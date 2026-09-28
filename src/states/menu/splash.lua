@@ -22,7 +22,7 @@ function splash:setupShit()
             self.timerAfter = Timer.after(self.splashScreens[self.splashNumber].time or 3, function() self:fade("out", function() self.splashNumber = self.splashNumber+1;self:setupShit() end) end)
         end
         self:fade("in", func)
-        self.currentMessageuhhhhhhh = love.graphics.newText(SkinHandler:getFont("Menu", 50),self.splashScreens[self.splashNumber].msg)  -- yes i know i can just draw this instead of using printf, im just too fucking lazy to edit the draw function
+        --self.currentMessageuhhhhhhh = love.graphics.newTextBatch(SkinHandler:getFont("Menu", 50),self.splashScreens[self.splashNumber].msg)  -- yes i know i can just draw this instead of using printf, im just too fucking lazy to edit the draw function
         self.currentMessage = self.splashScreens[self.splashNumber].msg
         if self.splashScreens[self.splashNumber].img then self.currentImage = self.splashScreens[self.splashNumber].img end
     else -- no more splashes, go to the title screen

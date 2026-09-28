@@ -376,6 +376,11 @@ function Player:_updateASyncInput()
 	end
 end
 
+function Player:_sendFocusToAsyncInput(t)
+	if not ASyncInput then return end
+	love.thread.getChannel("AsyncInput.focus.in"):push(t)
+end
+
 function Player:update()
 	self:_updateASyncInput()
 	self:_setActiveDevice()

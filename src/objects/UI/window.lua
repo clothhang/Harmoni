@@ -11,8 +11,6 @@ function window:new(parent,title,msg,buttons,checkbox,checkBoxDefault,checkBoxTe
     if type(parent) ~= "table" then GlobalNotificationsHandler:addNotification("window created with no parent!", "error") return end
     self.parent = parent
 
-
-
     self.title, self.msg = title, msg
     self.x, self.y = baseScreenRatio.x/2, baseScreenRatio.y/2 -- might make this able to change later,, idk 
 
@@ -22,6 +20,7 @@ function window:new(parent,title,msg,buttons,checkbox,checkBoxDefault,checkBoxTe
         self.checkBoxText = checkBoxText or "you forgot to type this dumbass :3"
     end
 
+    if self.bodyText then self.bodyText:release() end
     self.bodyText = love.graphics.newText(SkinHandler:getFont("Menu", 50), self.msg)    -- we dont even end up drawing this lol, we just use it for its size (i was too lazy to redo the draw func)
     self.width, self.height = self.bodyText:getDimensions()
     self.width = self.width + 150   -- hardcoded value!!! everyone's favorite!!!!!

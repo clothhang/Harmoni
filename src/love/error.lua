@@ -1,9 +1,11 @@
+---@diagnostic disable: duplicate-set-field
 local utf8 = require("utf8")
 
 local function error_printer(msg, layer)
 	print((debug.traceback("Here's what broke: " .. tostring(msg), 1+(layer or 1)):gsub("\n[^\n]+$", "")))
 end
 
+if not IS_DEBUG then
 function love.errorhandler(msg)
 	msg = tostring(msg)
 
@@ -182,3 +184,4 @@ function love.errorhandler(msg)
 
 end
 
+end

@@ -177,7 +177,7 @@ function jukebox:toggleFullscreen()
         local targetSizeX = baseScreenRatio.x
         local targetSizeY = baseScreenRatio.y
 
-        if self.songBG.image then
+        if (self.songBG or {}).image then
             self.currentBGPos.scaleX = targetSizeX / self.songBG.image:getWidth()
             self.currentBGPos.scaleY = targetSizeY / self.songBG.image:getHeight()
         else

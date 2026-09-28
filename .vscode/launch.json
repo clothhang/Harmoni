@@ -4,26 +4,12 @@
 		{
 			"type": "lua-local",
 			"request": "launch",
-			"name": "Debug",
-			"program": {
-				"command": "love"
-			},
-			"args": [
-				"src/",
-				"debug",
-				"--downscroll"
-			],
-		},
-		{
-			"type": "lua-local",
-			"request": "launch",
 			"name": "Release",
 			"program": {
-				"command": "love"
+				"command": "bin/love/love.exe"
 			},
 			"args": [
-				"src/",
-				"--downscroll"
+				"./src/",
 			],
 		},
 	]

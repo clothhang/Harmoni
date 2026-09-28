@@ -12,7 +12,7 @@ menuSongButton.total = { updating = 0, drawing = 0 }
 --- @param artist string
 --- @param charter string
 --- @param bpm number
---- @param image string | love.Image
+--- @param image string | love.Texture
 --- @param isDifficultyButton boolean
 --- @param gameMode string
 --- @param path string

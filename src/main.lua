@@ -10,6 +10,19 @@ AMERICA = false
 
 spongebirth = love.graphics.newImage("images/spongebirth.png")
 
+IS_DEBUG = os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" and arg[2] == "debug"
+if IS_DEBUG then
+	require("lldebugger").start()
+
+---@diagnostic disable-next-line: duplicate-set-field
+	function love.errorhandler(msg)
+		error(msg, 2)
+	end
+end
+
+-- TODO: Update deprecations to the new stuff
+love.setDeprecationOutput(false)
+
 function ithink(nums, whatDoYouThink)
     if type(nums) ~= "table" then return "i think you messed up the function call" end
     local count = 0
@@ -143,6 +156,10 @@ end
 
 function love.resize(w, h)
     State.resize(w, h)
+end
+
+function love.focus(f)
+    Input:_sendFocusToAsyncInput(f)
 end
 
 --if you wanna edit this, go to engine/CHE.lua and edit the CHE:draw() function to keep drawing in a letterboxed environment

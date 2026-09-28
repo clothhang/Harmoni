@@ -1,5 +1,6 @@
 tools/*
 !tools/*.py
+!tools/*.bat
 build/
 
 libs/**/*.a
@@ -13,3 +14,5 @@ src/Music/testlmao/*
 
 formatsource.py
 ss.toml
+
+bin/

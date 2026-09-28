@@ -11,6 +11,7 @@ end
 
 HarmoniVersion = "R-0.2.0"
 
+---@diagnostic disable-next-line: duplicate-set-field
 function love.conf(t)
     local debug = true
     t.console = true
@@ -19,7 +20,7 @@ function love.conf(t)
     t.window.width =  targetW      -- why did you even put "Rewrite" in it even ?? Just keep it as Harmoni brah
     t.window.height = targetH      -- its changed now
     t.window.resizable = true
-    t.window.highdpi = true
+    t.highdpi = true
     t.window.msaa = 8
     t.window.vsync = 0
 
@@ -33,4 +34,6 @@ function love.conf(t)
 
 
     t.window.icon = "images/icon.png"
+
+    t.version = "12.0"
 end

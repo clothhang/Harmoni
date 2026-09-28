@@ -20,6 +20,14 @@
     sliderField = require("objects.game.slider.sliderField")
     sliderReceptor = require("objects.game.slider.sliderReceptor")
 
+    --drums
+    drumsNote = require("objects.game.drums.drumsNote")
+    drumsLane = require("objects.game.drums.drumsLane")
+    drumsReceptor = require("objects.game.drums.drumsReceptor")
+    drumsInputButton = require("objects.game.drums.drumsInputButton")
+    drumsInputField = require("objects.game.drums.drumsInputField")
+    drumsApproachCircle = require("objects.game.drums.drumsApproachCircle")
+    
     --menu
     menuSongButton = require("objects.menu.songButton")
     modifiersMenu = require("objects.menu.modifiersMenu")
@@ -50,6 +58,7 @@
     newAlert = require("objects.UI.newAlert")    --this one is actually UIslop   (i call everything that i add to just make the UIs look more "full" UIslop, but the other ones are good additions at least, this one is just bad, so its especially UIslop)
     volumeControl = require("objects.UI.volumeControl")
     growingCircleObjectThingyIdfk = require("objects.UI.growingCircleObjectThingyIdfk")  -- this one is the most slop of all the UIslop i swear to god, i literally am stealing this from a vocaloid music video i saw,, and its my first time using bezier curves so im prob doing everuthing wrong
+    growingSquare = require("objects.UI.growingAwesomeFuckingSQAURE!!!")
 
     settingsbaseshitthingy = require("objects.settings.settingsbaseshitthingy")
     settingsTabButton = require("objects.settings.tabButton")

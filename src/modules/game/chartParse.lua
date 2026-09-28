@@ -98,6 +98,16 @@ function ChartParse.harmc(harmc,calculateDifficulty,playing)
                         knockback = (knockback == "true")
                     })
                 end
+            elseif chart.meta.gameMode == "drums" then
+                local key, startTime, lane = parts[1], parts[2], parts[4]
+                if key and startTime and lane then
+                    table.insert(chart[section], {
+                        type = key,
+                        startTime = startTime,
+                        lane = lane
+                    })
+                end
+                
             end
         end
 

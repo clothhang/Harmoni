@@ -22,6 +22,9 @@ function ithink(nums, whatDoYouThink)
     return (math.abs(count - whatDoYouThink) <3 and "yeah i think so") or "nah probably not"
 end
 
+function love.graphics.bullshit(x,y,size)
+    love.graphics.rectangle("fill", x, y, size, 0, x-(size/2), y-(size/2))
+end
 
 if love.system.getOS() == "OS X" then -- disable jit on arm osx because it performs like dookie rn
     if jit.arch == "arm64" or jit.arch == "arm" then

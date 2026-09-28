@@ -10,17 +10,22 @@ function gameModeManager:enter(s,mode,chart,fullchart,mods)
         self.gameMode = mania(self.chart, self, self.fullchart, self.mods)
     elseif mode == "slider" then
         self.gameMode = slider(chart, self, fullchart)
+    elseif mode == "drums" then
+        self.gameMode = drums(self.chart, self, self.fullchart, self.mods)
     end
+
+
+
     self.gameOver = false
 
     cursor.fadeOutWhenIdle = true    -- why dont we just add a check to the cursor to see if we are in gamemodemanager
                                      -- because its not like the cursor will only ever fade out in gamemodemanager
 
     gameModeManager:initializeSong()
-    SongScript:load(self.gameMode.chartPath .. "mod/script.lua")
+    if mode == "mania" then SongScript:load(self.gameMode.chartPath .. "mod/script.lua") end -- TEMP cuz i wanna add scripts to drums (and fucking slider if it ever doesnt suck)
     self.inSong = true  
 
-    SongScript:call("OnStart")
+   if mode == "mania" then  SongScript:call("OnStart") end
 end
 
 function gameModeManager:restart()

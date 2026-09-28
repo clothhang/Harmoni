@@ -21,7 +21,7 @@ function maniaJudgement:judge(judgement)
     end
     if not image then return end
 
-    if AchievementHandler then
+    if AchievementHandler then 
         if judgement == "Perfect" then
             AchievementHandler:unlock("first perfect judge")
         elseif judgement == "Great" then

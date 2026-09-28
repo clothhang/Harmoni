@@ -2,6 +2,8 @@ local resultsState = State("resultsState")
 
 function resultsState:enter(s, parent)
 
+   -- State.switch(States.extra.markus)
+
     self.score = parent.scoreHandler.Scores.trueScore
     self.heighestCombo = 459
     self.performanceRating = parent.scoreHandler.Scores.truePerformanceRating

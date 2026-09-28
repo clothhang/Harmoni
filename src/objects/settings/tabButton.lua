@@ -36,6 +36,7 @@ function tabButton:mousemoved(x, y)
     for i, member in ipairs(self.members) do
         member:mousemoved(x, y)
     end
+    
 end
 
 function tabButton:mousepressed(x, y, button)

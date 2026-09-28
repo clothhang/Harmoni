@@ -21,6 +21,9 @@ function titleScreen:enter(from, resetItems, fadeIn)
         ["exit"] = love.graphics.newImage("images/menu/exit.png")
     }
 
+
+   -- self.moth = love.graphics.newImage("images/moth.png")
+
     self.noteImage = love.graphics.newImage("images/menu/note.png")
 
     self.buttonWidth = 350
@@ -40,8 +43,9 @@ function titleScreen:enter(from, resetItems, fadeIn)
         },
         {
             label = LocaleHandler:getText("Menu", "Jukebox"), 
-            func = function() State.transition("waveDissolve", States.menu.jukebox) end, 
             --func = function() State.switch(States.aprilfools.tutorialState, "aprilfools/tutorials/fishsave.lua") end,
+            func = function() State.transition("waveDissolve", States.menu.jukebox) end, 
+
             color1 = {142/255,249/255,243/255,1},
             color2 = {88/255,246/255,238/255,1},
             icon = self.icons["jukebox"]
@@ -202,16 +206,21 @@ function titleScreen:enter(from, resetItems, fadeIn)
     end
 
     if resetItems then
+        print("HI")
         self:setUpThoseLinesThatIHate(10)
         self:setUpThoseWavesThatIHate(4)
         self:setUpThoseBubblesThatIHate(20)
+        self:setUpThoseSqauresThatIHate()
     end
+    self.thoseWeirdGrowingCirclesThatIHate = growingCircleObjectThingyIdfk()
 
     if self.coverAlpha > 0 then
         self:fadeIn(function()
             if AchievementHandler then AchievementHandler:unlock("title screen") end
         end)
     end
+
+
 end
 
 function titleScreen:setupSocialButtons()
@@ -318,6 +327,23 @@ function titleScreen:setUpThoseLinesThatIHate(numberOfLines)
     end
 end
 
+function titleScreen:setUpThoseSqauresThatIHate()
+    -- decide how long till the first one appearrs
+    local delay = love.math.random(5,5)
+    local colors = SkinHandler:getRandomColors()
+    print("SQUARE!!! SQAURREE!!!!!!", delay)
+
+    -- set da timer 
+    Timer.after(delay, function()
+
+        local x,y,size,color = love.math.random(0,baseScreenRatio.x), love.math.random(0,baseScreenRatio.y), love.math.random(100,500),colors[love.math.random(1,#colors)]
+                    print("SQUARE!!! SQAURREE!!!!!!", x,y,size,color)
+
+        self.awesomeSquare =  growingSquare(x,y,size,color)
+        self:setUpThoseSqauresThatIHate()
+    end)
+end
+
 function titleScreen:switchState(state)
     if state == "H" then
 
@@ -361,6 +387,12 @@ function titleScreen:update(dt)
     end
 
     self:updateBubbles(dt) 
+
+        if self.awesomeSquare then self.awesomeSquare:update(dt) end
+        self.thoseWeirdGrowingCirclesThatIHate:update(dt)
+
+
+
 end
 
 function titleScreen:updateBubbles(dt)
@@ -433,6 +465,8 @@ end
 
 function titleScreen:draw()
     love.graphics.draw(self.BG) -- TEMP 
+    if self.awesomeSquare then self.awesomeSquare:draw() end
+    self.thoseWeirdGrowingCirclesThatIHate:draw()
     for i, Bubble in ipairs(self.bubbles) do
         if not Bubble.isNote then
             Bubble:draw()
@@ -464,6 +498,10 @@ function titleScreen:draw()
         Button:draw()
     end
     self:drawLogo()
+
+
+   -- love.graphics.draw(self.moth)
+
     if self.window then self.window:draw() end
     love.graphics.setColor(0,0,0,self.coverAlpha + screenFade[1])
     love.graphics.rectangle("fill", 0, 0 , baseScreenRatio.x, baseScreenRatio.y)

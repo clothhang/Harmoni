@@ -46,7 +46,6 @@ function circleThing:update(dt)
         if math.abs(Thingies.theThingItselfPos[2] - Thingies.lastCircleThingy) > 100 then
             Thingies.lastCircleThingy = Thingies.theThingItselfPos[2]
             table.insert(self.circles, self:setUpACircle(Thingies.theThingItselfPos[1], Thingies.theThingItselfPos[2]))
-            print(#self.circles)
         end
     end
     self:raiseACircleRobloxNoWay()

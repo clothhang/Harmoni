@@ -1,3 +1,20 @@
 rename love to piss and bobs
 burger...
 mpphng~ b-but... we're both girls
+
+
+function growingSquare:draw()
+    love.graphics.rotate(math.rad(self.rotation))
+    love.graphics.push()
+        love.graphics.setColor(1,1,1,self.opacity)
+        love.graphics.translate(-self.size/2, -self.size/2)
+        love.graphics.rectangle("fill",self.x, self.y, self.size, self.size)
+    love.graphics.pop()
+
+    love.graphics.push()
+        love.graphics.setColor(1,1,1,self.squareTwoOpacity)
+        love.graphics.translate(-self.squareTwoSize/2, -self.squareTwoSize/2)
+        love.graphics.rectangle("line", self.x, self.y, self.squareTwoSize, self.squareTwoSize)
+    love.graphics.pop()
+    love.graphics.rotate(-math.rad(self.rotation))
+end

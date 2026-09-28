@@ -44,21 +44,20 @@ function drumsInputField:setUpApproachCircles()
     -- first we'll make the center so we can just create the others based on the center's location
     --find the center of the input field
     local centerX, centerY = self.width/2 + self.x, self.height/2 + self.y
-    local x,y = centerX, centerY -- just so the code is consistent 
-        --left
+    --left
     local x,y = centerX - (TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2), centerY
-    table.insert(circles, drumsApproachCircle(self, x,y, TEMPSKINBUTTONSIZE/2))
-        --down
-    local x,y = centerX, centerY + TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2
-    table.insert(circles, drumsApproachCircle(self, x,y, TEMPSKINBUTTONSIZE/2))
-        --center
-    table.insert(circles, drumsApproachCircle(self, centerX, centerY, 3, TEMPSKINBUTTONSIZE/2))
-        -- up
-    local x,y = centerX , (centerY - (TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2))
-    table.insert(circles, drumsApproachCircle(self, x,y, TEMPSKINBUTTONSIZE/2))
-        --right
-    local x,y = centerX + (TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2), centerY
-    table.insert(circles, drumsApproachCircle(self, x,y, TEMPSKINBUTTONSIZE/2))
+    table.insert(circles, drumsApproachCircle(self, x,y,TEMPSKINBUTTONSIZE/2))
+    --down
+    x,y = centerX, centerY + TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2
+    table.insert(circles, drumsApproachCircle(self, x,y,TEMPSKINBUTTONSIZE/2))
+    --center
+    table.insert(circles, drumsApproachCircle(self, centerX, centerY, TEMPSKINBUTTONSIZE/2))
+    --up
+    x,y = centerX, centerY - (TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2)
+    table.insert(circles, drumsApproachCircle(self, x,y,TEMPSKINBUTTONSIZE/2))
+    --right
+    x,y = centerX + (TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2), centerY
+    table.insert(circles, drumsApproachCircle(self, x,y,TEMPSKINBUTTONSIZE/2))
     return circles
 end
 

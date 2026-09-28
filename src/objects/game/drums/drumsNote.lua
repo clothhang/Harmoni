@@ -60,17 +60,16 @@ function drumsNote:draw()
     love.graphics.setColor(noteColors[tonumber(self.noteDirection)])
     if self.hitColor then love.graphics.setColor(self.hitColor) end
     love.graphics.circle("fill", self.x, self.y, self.radius)
-        love.graphics.setColor(0,0,0)
+    love.graphics.setColor(0,0,0)
 
-        local previousLineWidth = love.graphics.getLineWidth()
-        love.graphics.setLineWidth(10)
-            love.graphics.line(self.x,self.y-self.radius, self.x, self.y+self.radius)
+    local previousLineWidth = love.graphics.getLineWidth()
+    love.graphics.setLineWidth(10)
 
+    love.graphics.line(self.x, self.y-self.radius, self.x, self.y+self.radius)
     love.graphics.circle("line", self.x, self.y, self.radius)
     love.graphics.setLineWidth(previousLineWidth)
-
     love.graphics.setColor(1,1,1)
-    if not self.hit and self.noteTime-MusicTime > 0 then self.approachCircle:draw(MusicTime-self.noteTime) end
+    if not self.hit and self.noteTime-MusicTime > 0 then self.approachCircle:draw(self.noteTime-MusicTime) end
 end
 
 return drumsNote

@@ -8,8 +8,10 @@ function drumsApproachCircle:update(dt)
 end
 
 function drumsApproachCircle:draw(time)
-    self.currentRadius = time + self.targetRadius
-    love.graphics.circle("line", self.x, self.y, self.currentRadius/3, 30)
+    local approachTime = 500
+    local progress = math.max(0, math.min(1, time / approachTime))
+    self.currentRadius = self.targetRadius * (1 + progress * 2)
+    love.graphics.circle("line", self.x, self.y, self.currentRadius, 30)
 end
 
 return drumsApproachCircle

@@ -11,7 +11,12 @@ function setupControls()
             menuClickLeft = {"mouse:1"},
 
             drumsClick = {"mouse:1", "mouse:2", "key:z", "key:x"},
-
+            drumsLeftKey = {"key:d"},
+            drumsDownKey = {"key:f"},
+            drumsCenterKey = {"key:space"},
+            drumsUpKey = {"key:j"},
+            drumsRightKey = {"key:k"},
+            
             lane14K = {"key:d", "axis:triggerleft+"},
             lane24K = {"key:f", "button:leftshoulder"},
             lane34K = {"key:j", "button:rightshoulder"},

@@ -6,7 +6,7 @@ local noteColors =
     {0,1,0}, -- down
     {1,1,1}, -- center
     {0,0,1}, -- up
-    {0,1,1}, -- down
+    {0,1,1}, -- right
 }
 
 

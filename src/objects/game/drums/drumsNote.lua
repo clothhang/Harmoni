@@ -9,7 +9,7 @@ local noteColors =
     {0,1,0}, -- down
     {1,1,1}, -- center
     {0,0,1}, -- up
-    {0,1,1}, -- down
+    {0,1,1}, -- right
 }
 
 
@@ -37,6 +37,12 @@ function drumsNote:onHit(judgement)
  --   self:getHitColor()
 end
 
+
+function drumsNote:botPlayHit()
+    print("JI")
+    if math.abs(self.noteTime-MusicTime) < self.parent.parent.judgements[1].timing then self:onHit({name = "Perfect", time = self.noteTime-MusicTime, absTime = math.abs(self.noteTime-MusicTime), color = {0,1,0}}) end
+end
+
 function drumsNote:getPosition()
     self.x = ((self.noteTime - MusicTime) * PLACEHOLDERdrumsscrollspeed) + (baseScreenRatio.x/2)
     self.visible = (self.x - self.radius < baseScreenRatio.x and self.x > 0-self.radius)
@@ -44,6 +50,8 @@ end
 
 function drumsNote:update(dt)
     self:getPosition()
+
+    if self.parent.parent.mods["BP"] and not self.hit then self:botPlayHit() end
 end
 
 function drumsNote:getHitColor()

@@ -1,6 +1,7 @@
 local drums = Class:extend("drums")
 
-function drums:new(chart, parent, fullChart)
+function drums:new(chart, parent, fullChart, mods)
+    self.mods = mods
     self.chartPath = getDirectory(chart)
     self.chart = self:setUpChart(chart,fullChart)
 
@@ -18,7 +19,13 @@ function drums:new(chart, parent, fullChart)
         self:setUpObjects()
 
 
-    
+    self.keyboardInputs = {  -- used for keyboard only modifier
+        "drumsLeftKey",
+        "drumsDownKey",
+        "drumsCenterKey",
+        "drumsUpKey",
+        "drumsRightKey"
+    }
 end
 
 function drums:setUpObjects()
@@ -51,6 +58,12 @@ function drums:checkInput()
     if Input:pressed("drumsClick") then
         print("drums:checkInput()")
         self.inputField:onClick()
+    end
+end
+
+function drums:checkKeyboardInput()  -- only used when the keyboard modifier is active 
+    for i = 1,#self.keyboardInputs do
+        if Input:pressed(self.keyboardInputs[i]) then self.inputField:onClick(i) end
     end
 end
 
@@ -164,6 +177,7 @@ function drums:update(dt)
     cursor.fadeOutWhenIdle = false
     self:updateObjects(dt)
     self:checkInput()
+    if self.mods["NLN"] then self:checkKeyboardInput() end  -- temp until i make Drums modifiers
 
     if self.song and MusicTime >= 0 and not self.song:isPlaying() and not played and not self.paused then
         self.song:play()

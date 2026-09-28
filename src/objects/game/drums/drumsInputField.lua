@@ -69,7 +69,16 @@ function drumsInputField:update(dt)
 
 end
 
-function drumsInputField:onClick()
+function drumsInputField:onClick(key)
+    if key then
+        for i, Button in ipairs(self.buttons) do
+            if i == key then
+                Button:onClick()
+                break
+            end
+        end
+    return end
+    
     print("drumsInputField:onClick()")
     -- check if the cursor is over any buttosn, if it does, run onClick for that button 
     local cx,cy = cursor:getPosition()

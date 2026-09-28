@@ -9,6 +9,14 @@ local noteColors =
     {0,1,1}, -- right
 }
 
+local noteInputs = {
+    "d",
+    "f",
+    "space",
+    "j",
+    "k"
+}
+
 
 
 function drumsInputButton:new(parent,x,y,direction,radius)
@@ -58,6 +66,10 @@ end
 function drumsInputButton:draw()
     love.graphics.setColor(noteColors[tonumber(self.direction)])
     love.graphics.circle("fill", self.x,self.y,self.radius)
+    if self.parent.parent.mods["NLN"] then
+        love.graphics.setColor(0,0,0)
+        love.graphics.print(noteInputs[tonumber(self.direction)], self.x, self.y)
+    end
     love.graphics.setColor(1,1,1)
 end
 

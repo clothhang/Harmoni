@@ -70,7 +70,6 @@ function love.load(args)
     if mostPreferred.language == "en" and mostPreferred.country ~= "US" then mostPreferred.country = "US" end
     print("Most preferred locale: " .. mostPreferred.language .. "-" .. mostPreferred.country)
     LocaleHandler:loadLocale(mostPreferred.language .. "-" .. mostPreferred.country .. ".lua")
-    if os.getenv("USERNAME") == "Guglio" then LocaleHandler:loadLocale("furry.lua") end
     CLibs = require("modules.game.handleCLibs")
     Settings:addSkinsToSettings(SkinHandler:getAllSkins())
 

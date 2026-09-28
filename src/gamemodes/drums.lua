@@ -176,8 +176,9 @@ end
 function drums:update(dt)
     cursor.fadeOutWhenIdle = false
     self:updateObjects(dt)
-    self:checkInput()
-    if self.mods["NLN"] then self:checkKeyboardInput() end  -- temp until i make Drums modifiers
+    
+    if self.mods["NLN"] then self:checkKeyboardInput()  -- temp until i make Drums modifiers
+    else self:checkInput() end
 
     if self.song and MusicTime >= 0 and not self.song:isPlaying() and not played and not self.paused then
         self.song:play()

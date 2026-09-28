@@ -45,7 +45,7 @@ function drumsInputField:setUpApproachCircles()
     --find the center of the input field
     local centerX, centerY = self.width/2 + self.x, self.height/2 + self.y
     --left
-    local x,y = centerX - (TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2), centerY
+    local x,y = centerX, centerY - (TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2)
     table.insert(circles, drumsApproachCircle(self, x,y,TEMPSKINBUTTONSIZE/2))
     --down
     x,y = centerX, centerY + TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2
@@ -53,7 +53,7 @@ function drumsInputField:setUpApproachCircles()
     --center
     table.insert(circles, drumsApproachCircle(self, centerX, centerY, TEMPSKINBUTTONSIZE/2))
     --up
-    x,y = centerX, centerY - (TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2)
+    x,y = centerX - (TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2), centerY
     table.insert(circles, drumsApproachCircle(self, x,y,TEMPSKINBUTTONSIZE/2))
     --right
     x,y = centerX + (TEMPSKINBUTTONSEPERATION + TEMPSKINBUTTONSIZE/2*2), centerY
@@ -77,7 +77,8 @@ function drumsInputField:onClick(key)
                 break
             end
         end
-    return end
+        return
+    end
     
     print("drumsInputField:onClick()")
     -- check if the cursor is over any buttosn, if it does, run onClick for that button 

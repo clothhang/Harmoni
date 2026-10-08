@@ -95,9 +95,11 @@ local function setupCLibs()
         print("Successfully loaded video DLL.")
     else
         print("Warning: Could not load video DLL. Video playback disabled.")
-        print("Error message: " .. DLL_Video)
+        --print("Error message: " .. DLL_Video)
+        DLL_Video = nil
     end
     DLL_Video = _DLL_Video
+    if not DLL_Video or not DLL_Video.open then DLL_Video = nil end
 
     local ok, _video = pcall(require, "objects.game.shared.video")
     if ok then

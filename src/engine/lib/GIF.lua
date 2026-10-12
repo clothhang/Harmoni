@@ -450,7 +450,7 @@ function Gif.pushLove()
     ---@diagnostic disable-next-line: duplicate-set-field
     function love.graphics.draw(...)
         local first = select(1, ...)
-        if first:typeOf("GIF") then
+        if first.typeOf and first:typeOf("GIF") then
             first:draw(select(2, ...))
         else
             ogdraw(...)

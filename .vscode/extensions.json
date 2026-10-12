@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "tomblind.local-lua-debugger-vscode",
-        "sumneko.lua"
+        "sumneko.lua",
+        "fabiospampinato.vscode-todo-plus"
     ]
 }

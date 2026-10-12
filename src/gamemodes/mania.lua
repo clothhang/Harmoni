@@ -173,7 +173,7 @@ function mania:setUpChart(chartpath, chart)
     }
 
     -- Setup video background if valid
-    if parsed.meta.backgroundVideo then
+    if parsed.meta.backgroundVideo and self.mods["NVB"] then
         self.videoBackground = video(
             songPath .. "/" .. parsed.meta.backgroundVideo,
             baseScreenRatio.x / 2,

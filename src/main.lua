@@ -97,6 +97,8 @@ function love.load(args)
     SongListManager = require("modules.game.songListManager")
     CaptionParser = require("modules.game.captionParser")
     Point = require("modules.math.Point")
+    Metaballs = require("modules.metaballs")
+
     -- seems to be the best place to load these so,,, we load modifiers in main lol 
     modifiersTable = require("modules.game.data.modifiers")
 
@@ -105,6 +107,30 @@ function love.load(args)
     SongScript = require("modules.Modscript.ModscriptManager")
 
     if aprilFools then require("aprilfools") end -- fucking awesome
+
+    CLibs:setupIfNeeded()
+    love.audio.newAdvancedSource = require("engine.lib.asl.asl")
+    tryExcept(function()
+        if love.system.getOS() ~= "Windows" then
+            return
+        end
+        print("Loading Steam...")
+        Steam = require("engine.lib.sworks.main")
+        print("Steam loaded!")
+    end, function(err)
+        print("Warning: Could not load Steamworks. Steam features will be disabled.")
+        print("Error message: " .. err)
+    end)
+
+    if Steam then
+        if not Steam.init() or not Steam.isRunning() then
+            Steam = nil
+            print("Steam failed to initialize!")
+        else
+            Steam.USER = Steam.getUser()
+            Steam.USERNAME = Steam.USER:getName()
+        end
+    end
 
     State.switch(States.menu.preloadState)
 

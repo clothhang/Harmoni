@@ -35,7 +35,6 @@ function songPreloader:update(dt)
     if self.songDifficultiesDone  then  return end
     local i = self.currentIndex
     local song = self.songList[i]
-    print(song)
     local diffList = SongListManager.getDifficultyList(musicPath .. song)
 
 

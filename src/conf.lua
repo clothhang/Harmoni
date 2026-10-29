@@ -35,5 +35,5 @@ function love.conf(t)
 
     t.window.icon = "images/icon.png"
 
-    t.version = "12.0"
+    --t.version = "12.0"
 end

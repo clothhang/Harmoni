@@ -220,7 +220,7 @@ function titleScreen:enter(from, resetItems, fadeIn)
         end)
     end
 
-
+    self.metaballs = Metaballs()
 end
 
 function titleScreen:setupSocialButtons()
@@ -366,6 +366,7 @@ local function sortByScale(a,b)
 end
 
 function titleScreen:update(dt)
+    self.metaballs:update(dt)
     fade = math.min(fade + dt*5, 1)
 
     for i, Button in ipairs(self.buttons) do
@@ -465,16 +466,17 @@ end
 
 function titleScreen:draw()
     love.graphics.draw(self.BG) -- TEMP 
+    self.metaballs:draw()
     if self.awesomeSquare then self.awesomeSquare:draw() end
     self.thoseWeirdGrowingCirclesThatIHate:draw()
-    for i, Bubble in ipairs(self.bubbles) do
-        if not Bubble.isNote then
-            Bubble:draw()
-        else
-            love.graphics.setColor(Bubble.color)
-            love.graphics.draw(self.noteImage,Bubble.x,Bubble.y, math.rad(Bubble.rotation), 1+Bubble.squishX*(Bubble.radius/130), 1+Bubble.squishY*(Bubble.radius/130), self.noteImage:getWidth()/2, self.noteImage:getHeight()/2)
-        end
-    end
+    -- for i, Bubble in ipairs(self.bubbles) do
+    --     if not Bubble.isNote then
+    --        -- Bubble:draw()
+    --     else
+    --         love.graphics.setColor(Bubble.color)
+    --         love.graphics.draw(self.noteImage,Bubble.x,Bubble.y, math.rad(Bubble.rotation), 1+Bubble.squishX*(Bubble.radius/130), 1+Bubble.squishY*(Bubble.radius/130), self.noteImage:getWidth()/2, self.noteImage:getHeight()/2)
+    --     end
+    -- end
     love.graphics.print("harmoni lol")
 
     love.graphics.setColor(1,1,1,0.1)

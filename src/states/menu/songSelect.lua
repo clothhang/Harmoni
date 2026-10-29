@@ -10,12 +10,13 @@ local selectedSong = 1
 local hoveredSong = 0
 local BGAlpha = {1}
 
+
 local currentDisplayedBG
 local previousBG
 
 local BGDarkness = 0
 
-local songButtonX = baseScreenRatio.x - songButtonWidth - songButtonSpacing
+local songButtonX = baseScreenRatio.x - songButtonWidth - songButtonSpacing +70
 
 local difficultyButtonX = songButtonX
 
@@ -33,6 +34,8 @@ function songSelect:enter()
 
 
     self.currentSongInfo = {}
+
+    self.songInfoY = 20
     -- selectedSong = 1
     switchingState = false
     self.colors = {
@@ -214,6 +217,10 @@ end
     self.modifiersMenu = modifiersMenu(20,400,600,670)
 
   --  self:checkForSongButtonClicks(false)
+    self.buttonBezierCurveMiddleXControlPoint = 100
+  self.buttonBezierCurve = love.math.newBezierCurve(baseScreenRatio.x, 0,
+                                                    baseScreenRatio.x-self.buttonBezierCurveMiddleXControlPoint, baseScreenRatio.y/2,
+                                                    baseScreenRatio.x, 0)
 end
 
 function songSelect:setUpThoseLinesThatIHate(numberOfLines)
@@ -594,6 +601,16 @@ function songSelect:scroll(s)
 end
 
 function songSelect:updateSongButtons(dt)
+    local function getBezierCurveEvalForSongButtonPosition(songButton)
+        -- get the eval thingy for the center of the song button by doing stuff idfk
+        local centerY = songButton.y+songButton.height/2
+        -- check where that value is on the window Y axis
+        local uhh = centerY/baseScreenRatio.y
+        if uhh <0 then uhh = 0 end
+        if uhh >1 then uhh = 1 end
+        local ummX, ummY = self.buttonBezierCurve:evaluate(uhh)
+        return ummX-baseScreenRatio.x
+    end
     local speed = 10
 
     for i, SongButton in ipairs(songButtons) do
@@ -602,6 +619,7 @@ function songSelect:updateSongButtons(dt)
         end
         local targetY = (i * (songButtonHeight + songButtonSpacing)) + hoveredSong
         local targetX = (self.menuState == "song" and songButtonX) or baseScreenRatio.x + songButtonSpacing
+        targetX = targetX + getBezierCurveEvalForSongButtonPosition(SongButton)
         if i == selectedSong and self.menuState ~= "difficulty" then targetX = targetX - 50 end
         if self.ignoreInterpolation then
             SongButton.y = targetY
@@ -688,12 +706,19 @@ function songSelect:updateDifficultyButtons(dt)
     end
 end
 
+function songSelect:tweenSongInfo()
+    self.songInfoY = -50
+    if self.songInfoTween then Timer.cancel(self.songInfoTween) end
+    self.songInfoTween = Timer.tween(0.15, self, {songInfoY = 20}, "out-back")
+end
+
 function songSelect:checkForSongButtonClicks(requireClick)
     local buttonInfo = false
     if self.menuState == "difficulty" then return end
     for i, SongButton in ipairs(songButtons) do
         local thething = function()
                 self.currentSongInfo = SongButton:returnInfo()
+                self:tweenSongInfo()
                 if not self.currentSongInfo.bpm then 
                     selectedSong = i
                     self.currentSongInfo = SongButton:returnInfo()
@@ -826,14 +851,16 @@ function songSelect:draw(dt)
 
     love.graphics.setColor(1,1,1)
     love.graphics.setLineWidth(5)
-    love.graphics.line(songButtonX-songButtonSpacing, songButtonSpacing*2, songButtonX-songButtonSpacing, baseScreenRatio.y-songButtonSpacing*2)
+   -- love.graphics.line(songButtonX-songButtonSpacing, songButtonSpacing*2, songButtonX-songButtonSpacing, baseScreenRatio.y-songButtonSpacing*2)
 
     for _, SongButton in ipairs(songButtons) do
         SongButton:draw()
     end
 
+
+
     if songSelect.difficultyListDraw then songSelect:difficultyListDraw() end
-    self:drawSongInfo(20,20,15)
+    self:drawSongInfo(20,self.songInfoY,15)
 
     self:drawCircleWithContents()
     self.modifiersMenu:draw()
@@ -850,10 +877,15 @@ function songSelect:draw(dt)
 
     if self.window then self.window:draw() end
 
+
     menuSongButton:resetCounts()
 end
 
 function songSelect:drawSongInfo(x, y, spacing)
+    --[[
+    love.graphics.setColor(0,0,0)
+
+    local originalX, originalY = x,y
     love.graphics.setFont(SkinHandler:getFont("Menu", 75))
     love.graphics.printf(self.currentSongInfo.name or (LocaleHandler:getText("GeneralErrors", "No Song Name")), x, y, 2000, "left")
     y = y + SkinHandler:getFont("Menu", 75):getHeight() + spacing
@@ -873,6 +905,33 @@ function songSelect:drawSongInfo(x, y, spacing)
     y = y + SkinHandler:getFont("Menu", 30):getHeight() + spacing
 
     love.graphics.printf(LocaleHandler:getText("Menu","LN%") .. LocaleHandler:getText("Misc", "Placeholder"), x, y, 1000, "left")
+    --]]
+
+    -- now we do all that shit again but slightly different yay !!!!!1!!!!!!!!!
+
+    love.graphics.setColor(1,1,1)
+
+   -- local x,y = originalX,originalY-1
+    love.graphics.setFont(SkinHandler:getFont("Menu", 75))
+    printFOutline({0,0,0}, 3, self.currentSongInfo.name or (LocaleHandler:getText("GeneralErrors", "No Song Name")), x, y, 2000, "left")
+    y = y + SkinHandler:getFont("Menu", 76):getHeight() + spacing
+
+    love.graphics.setFont(SkinHandler:getFont("Menu", 30))
+    printFOutline({0,0,0}, 3,LocaleHandler:getText("Menu","Song By").. (self.currentSongInfo.artist or (LocaleHandler:getText("GeneralErrors", "No Artist Name"))), x, y, 1000, "left")
+    y = y + SkinHandler:getFont("Menu", 31):getHeight() + spacing
+
+    printFOutline({0,0,0}, 3,LocaleHandler:getText("Menu","Charted By").. (self.currentSongInfo.charter or LocaleHandler:getText("GeneralErrors", "No Charter Name")), x,y, 1000, "left")
+    y = y + SkinHandler:getFont("Menu", 31):getHeight() + spacing
+
+    love.graphics.setFont(SkinHandler:getFont("Menu", 20))
+    printFOutline({0,0,0}, 3,LocaleHandler:getText("Menu", "Length") .. LocaleHandler:getText("Misc", "Placeholder"), x, y, 1000, "left")
+    y = y + SkinHandler:getFont("Menu", 31):getHeight() + spacing
+
+   printFOutline({0,0,0}, 3,LocaleHandler:getText("Menu","BPM") .. (self.currentSongInfo.bpm or LocaleHandler:getText("GeneralErrors", "unknown")), x, y, 1000, "left")
+    y = y + SkinHandler:getFont("Menu", 31):getHeight() + spacing
+
+    printFOutline({0,0,0}, 3,LocaleHandler:getText("Menu","LN%") .. LocaleHandler:getText("Misc", "Placeholder"), x, y, 1000, "left")
+
 end
 
 

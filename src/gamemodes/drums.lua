@@ -7,7 +7,6 @@ function drums:new(chart, parent, fullChart, mods)
 
     self.judgements = require("modules.gamemodes.drums.drumsJudgements")
 
-     -- cursor is pretty important for this mode lol, cant have it randomly dissapearing 
 
     self.parent = parent
 
@@ -177,8 +176,7 @@ function drums:update(dt)
     cursor.fadeOutWhenIdle = false
     self:updateObjects(dt)
     
-    if self.mods["NLN"] then self:checkKeyboardInput()  -- temp until i make Drums modifiers
-    else self:checkInput() end
+    self:checkKeyboardInput()
 
     if self.song and MusicTime >= 0 and not self.song:isPlaying() and not played and not self.paused then
         self.song:play()

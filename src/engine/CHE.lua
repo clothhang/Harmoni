@@ -18,6 +18,26 @@ function mouseOver(object)
            my >= object.y and my <= object.y + object.height
 end
 
+function printFOutline(outlineColor,outlineThickness,str,x,y,limit,align)
+    -- first we draw the outline
+    -- we need to save the current color tho, cuz we only get the outline color as an arg, the main color is the current color
+    if not limit then error("missing limit argument for printFOutline") end
+    if not align then align = "left" end
+    if type(limit) ~= "number" then error("invalid argument 6 for printFOutline, number expected, got "  .. type(align)) end
+    local ccr,ccg,ccb,cca = love.graphics.getColor()
+    love.graphics.setColor(outlineColor)
+    for fx = -outlineThickness, outlineThickness do
+        for fy = -outlineThickness, outlineThickness do
+            love.graphics.printf(str, x+fx, y+fy, limit, align) 
+        end
+    end
+     -- now we can just print the regular text
+     love.graphics.setColor(ccr,ccg,ccb,cca)
+    love.graphics.printf(str, x, y, limit, align) 
+
+
+end
+
 function CHE:init()
     Fullscreen = false
     Console = require("engine.modules.console")

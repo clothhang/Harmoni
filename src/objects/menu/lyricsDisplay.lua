@@ -1,4 +1,57 @@
 local lyricsDisplay = Class:extend("lyricsDisplay")
+local utf8 = require("utf8")
+
+local function parseDisplayColours(text)
+    local runs = {}
+    local activeColour = nil
+    local colourStack = {}
+
+    local function addRun(value)
+        if value == "" then return end
+
+        local last = runs[#runs]
+
+        if last and last.colour == activeColour then
+            last.text = last.text .. value
+        else
+            table.insert(runs, {
+                text = value,
+                colour = activeColour
+            })
+        end
+    end
+
+    local position = 1
+
+    while position <= #text do
+       local startPos, endPos, tag = text:find("<([^>]+)>", position)
+
+        if not startPos then
+            addRun(text:sub(position))
+            break
+        end
+
+        addRun(text:sub(position, startPos - 1))
+
+        local hex = tag:match("^c=(#%x%x%x%x%x%x)$")
+
+        if hex then
+            table.insert(colourStack, activeColour)
+
+            activeColour = {tonumber(hex:sub(2, 3), 16) / 255, tonumber(hex:sub(4, 5), 16) / 255, tonumber(hex:sub(6, 7), 16) / 255}
+        elseif tag == "/c" then
+            activeColour = table.remove(colourStack)
+        end
+
+        position = endPos + 1
+    end
+
+    return runs
+end
+
+local function getPlainLyric(text)
+    return tostring(text or ""):gsub("<c=#%x%x%x%x%x%x>", ""):gsub("</c>", "")
+end
 
 function lyricsDisplay:new(x, y, width, height, lyrics)
     if type(lyrics) ~= "table" then error("are you fucking stupid or something?") end
@@ -22,7 +75,7 @@ function lyricsDisplay:setUpLyrics()
     local wrapLimit = self.lyricRectWidth - 30
 
     for _, Lyric in ipairs(self.lyrics) do
-        local text = Lyric.text or ""
+        local text = getPlainLyric(Lyric.text)
         local _, wrappedLines = font:getWrap(text, wrapLimit)
 
         local textHeight = #wrappedLines * lineHeight
@@ -134,97 +187,81 @@ function lyricsDisplay:hitLyric(lyricIndex)
     end
 end
 
+
 local function drawRichText(text, x, y, wrap)
     text = tostring(text or "")
 
-    if not text:find("<") then
-        love.graphics.printf(text, x, y, wrap, "left")
-        return
-    end
-
-    local baseFont = SkinHandler:getFont("Menu", 50) or love.graphics.getFont()
-
-    local prevFont = love.graphics.getFont()
+    local font = SkinHandler:getFont("Menu", 50) or love.graphics.getFont()
+    local previousFont = love.graphics.getFont()
     local prevR, prevG, prevB, prevA = love.graphics.getColor()
 
-    local lineHeight = baseFont:getHeight()
-    local curY = y
-    local activeColor = nil
+    love.graphics.setFont(font)
 
-    for line in text:gmatch("([^\n]*)\n?") do
-        font = baseFont
-        love.graphics.setFont(font)
+    local runs = parseDisplayColours(text)
+    local lines = {{}}
+    local cursorX = 0
+    local lineHeight = font:getHeight()
 
-        if line == "" and not text:find("^%s*$") then
-            curY = curY + lineHeight
-        else
-            if not line:find("<") then
-                love.graphics.setFont(baseFont)
-                love.graphics.setColor(prevR, prevG, prevB, prevA)
-                love.graphics.printf(line, x, curY, wrap, "left")
+    for _, run in ipairs(runs) do
+        for _, code in utf8.codes(run.text) do
+            local char = utf8.char(code)
+
+            if char == "\n" then
+                table.insert(lines, {})
+                cursorX = 0
             else
-                local cursorX = x
-                local s = line
-                while #s > 0 do
-                    local pre, tag, post = s:match("^(.-)(<[^>]+>)(.*)")
-                    if not tag then
-                        if s ~= "" then
-                            love.graphics.setFont(font)
-                            love.graphics.printf(s, cursorX, curY, wrap, "left")
-                            cursorX = cursorX + font:getWidth(s)
-                        end
-                        break
-                    end
+                local charWidth = font:getWidth(char)
 
-                    if pre ~= "" then
-                        love.graphics.setFont(font)
-                        love.graphics.printf(pre, cursorX, curY, wrap, "left")
-                        cursorX = cursorX + font:getWidth(pre)
-                    end
-
-                    if tag == "<i>" then
-                    elseif tag == "</i>" then
-                    elseif tag:match("^<c=#%x%x%x%x%x%x>$") then
-                        local hex = tag:match("^<c=(#%x+)>$")
-                        if hex then
-                            activeColor = hex
-                            local r = tonumber(hex:sub(2,3),16)/255
-                            local g = tonumber(hex:sub(4,5),16)/255
-                            local b = tonumber(hex:sub(6,7),16)/255
-                            if prevR ~= 1 then
-                                -- darken
-                                r = r * 0.6
-                                g = g * 0.6
-                                b = b * 0.6
-                            end
-                            love.graphics.setColor(r, g, b, 1)
-                        end
-                    elseif tag == "</c>" then
-                        activeColor = nil
-                        love.graphics.setColor(prevR, prevG, prevB, prevA)
-                    elseif tag == "<b>" then
-                    elseif tag == "</b>" then
-                    elseif tag == "<u>" then
-                        local underlineY = curY + lineHeight - 5
-                        love.graphics.line(cursorX, underlineY, cursorX + font:getWidth(post), underlineY)
-                    elseif tag == "</u>" then
-                    elseif tag == "<s>" then
-                        local strikeY = curY + lineHeight / 2
-                        love.graphics.line(cursorX, strikeY, cursorX + font:getWidth(post), strikeY)
-                    elseif tag == "</s>" then
-                    end
-
-                    s = post
+                if cursorX + charWidth > wrap and cursorX > 0 then
+                    table.insert(lines, {})
+                    cursorX = 0
                 end
-            end
 
-            curY = curY + lineHeight
+                local currentLine = lines[#lines]
+                local last = currentLine[#currentLine]
+
+                if last and last.colour == run.colour then
+                    last.text = last.text .. char
+                else
+                    table.insert(currentLine, {
+                        text = char,
+                        colour = run.colour
+                    })
+                end
+
+                cursorX = cursorX + charWidth
+            end
         end
     end
 
-    love.graphics.setFont(prevFont)
+    for lineIndex, line in ipairs(lines) do
+        local cursorX = x
+        local cursorY = y + (lineIndex - 1) * lineHeight
+
+        for _, run in ipairs(line) do
+            if run.colour then
+                local r, g, b = run.colour[1], run.colour[2], run.colour[3]
+
+                if prevR ~= 1 or prevG ~= 1 or prevB ~= 1 then
+                    r = r * 0.6
+                    g = g * 0.6
+                    b = b * 0.6
+                end
+
+                love.graphics.setColor(r, g, b, prevA)
+            else
+                love.graphics.setColor(prevR, prevG, prevB, prevA)
+            end
+
+            love.graphics.print(run.text, cursorX, cursorY)
+            cursorX = cursorX + font:getWidth(run.text)
+        end
+    end
+
+    love.graphics.setFont(previousFont)
     love.graphics.setColor(prevR, prevG, prevB, prevA)
 end
+
 
 function lyricsDisplay:draw()
     -- background

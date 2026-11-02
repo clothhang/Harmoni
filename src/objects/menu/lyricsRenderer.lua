@@ -30,6 +30,83 @@ local function hexToRGBA(hex)
     return r,g,b,1
 end
 
+local function parseColourRuns(text, defaultColour)
+    text = tostring(text or "")
+
+    local runs = {}
+    local plain = {}
+    local colourStack = {}
+    local activeColour = defaultColour or {1, 1, 1, 1}
+
+    local function addRun(value)
+        if value == "" then return end
+
+        table.insert(plain, value)
+
+        local last = runs[#runs]
+        if last and last.color == activeColour then
+            last.text = last.text .. value
+        else
+            table.insert(runs, {
+                text = value,
+                color = activeColour
+            })
+        end
+    end
+
+    local position = 1
+
+    while position <= #text do
+        local curlyStart = text:find("{", position, true)
+
+        if curlyStart then
+            local curlyEnd = text:find("}", curlyStart + 1, true)
+
+            if curlyEnd and (not startPos or curlyStart < startPos) then
+                addRun(text:sub(position, curlyStart - 1))
+                position = curlyEnd + 1
+            end
+        end
+        local startPos, endPos, tag = text:find("<([^>]+)>", position)
+
+        if not startPos then
+            addRun(text:sub(position))
+            break
+        end
+
+        addRun(text:sub(position, startPos - 1))
+
+        local hex = tag:match("^c=(#%x%x%x%x%x%x)$")
+
+        if hex then
+            table.insert(colourStack, activeColour)
+
+            local r, g, b, a = hexToRGBA(hex)
+            activeColour = {r, g, b, a}
+        elseif tag == "/c" then
+            activeColour = table.remove(colourStack) or defaultColour or {1, 1, 1, 1}
+        else
+            addRun(text:sub(startPos, endPos))
+        end
+
+        position = endPos + 1
+    end
+
+    return runs, table.concat(plain)
+end
+
+local function measurePlainText(font, text)
+    local maxWidth = 0
+    local lineCount = 0
+
+    for line in (text .. "\n"):gmatch("(.-)\n") do
+        maxWidth = math.max(maxWidth, font:getWidth(line))
+        lineCount = lineCount + 1
+    end
+
+    return maxWidth, lineCount * font:getHeight()
+end
+
 local function stripRich(s)
     if not s then return "" end
     return (s:gsub("{[^}]-}", ""):gsub("<[^>]->", ""))
@@ -114,20 +191,17 @@ function LyricsRenderer:buildTimeline(evt)
         if block:match("<s>") or block:match("\\s1") then static.strike = true end
         if block:match("</s>") or block:match("\\s0") then static.strike = false end
 
-        local colorHex = block:match("<c=(#%x+)>")
-        if colorHex then
-            static.color = {hexToRGBA(colorHex)}
-        else
-            local assCol = block:match("&H[%x]+&") or block:match("H[%x]+&")
-            if assCol then
-                local hex = assCol
-                if not hex:match("^&H") then hex = "&H"..hex end
-                local r,g,b,a = assHexToRGBA(hex)
-                static.color = {r,g,b,a}
-            else
-                local alt = block:match("<color=(#%x+)>") or block:match("<c:#(%x+)>")
-                if alt then static.color = {hexToRGBA(alt)} end
+        local assCol = block:match("&H[%x]+&") or block:match("H[%x]+&")
+
+        if assCol then
+            local hex = assCol
+
+            if not hex:match("^&H") then
+                hex = "&H" .. hex
             end
+
+            local r, g, b, a = assHexToRGBA(hex)
+            static.color = {r, g, b, a}
         end
 
         local fname = block:match("<fontName=(.-)>")
@@ -253,6 +327,7 @@ end
 
 function LyricsRenderer:prepareEvents()
     local df = self.defaultFont
+
     for _, evt in ipairs(self.events) do
         if not evt.time and evt.start then evt.time = evt.start end
         if not evt.endTime and evt["end"] then evt.endTime = evt["end"] end
@@ -264,6 +339,8 @@ function LyricsRenderer:prepareEvents()
         evt.override = {}
 
         evt.timeline = self:buildTimeline(evt)
+        evt.colourRuns = parseColourRuns(evt.assRaw, evt.timeline.static.color)
+
         local font = df
         local size = evt.timeline.static.size or self.defaultSize
         if SkinHandler and SkinHandler.getFont and evt.timeline.static.font then
@@ -271,13 +348,10 @@ function LyricsRenderer:prepareEvents()
         end
         evt._cachedFont = font
         local text = evt.plain or ""
-        local w = font:getWidth(text)
-        local h = font:getHeight()
+        local w, h = measurePlainText(font, text)
         evt.cachedWidth = w
         evt.cachedHeight = h
         if evt.timeline.karaokeSegments and #evt.timeline.karaokeSegments > 0 then
-            local baseTime = evt.time or 0
-            local cx = 0
             for i, seg in ipairs(evt.timeline.karaokeSegments) do
                 seg._width = font:getWidth(seg.text or "")
                 seg._startSec = (seg.start or 0) / 100
@@ -372,6 +446,61 @@ function LyricsRenderer:draw(audioTime)
         love.graphics.print(txt, x, y)
         love.graphics.pop()
     end
+    local function drawColourRuns(runs, x, y, mode)
+        local cursorX = x
+        local cursorY = y
+        local lineHeight = font:getHeight()
+
+        for _, run in ipairs(runs) do
+            love.graphics.setColor(run.color[1], run.color[2], run.color[3], run.color[4] * a)
+
+            for line in (run.text .. "\n"):gmatch("(.-)\n") do
+                if line ~= "" then
+                    if mode == "shadow" or mode == "border" then
+                        love.graphics.setColor(0, 0, 0, a)
+                    else
+                        love.graphics.setColor(run.color[1], run.color[2], run.color[3], run.color[4] * a)
+                    end
+
+                    love.graphics.print(line, cursorX, cursorY)
+                    cursorX = cursorX + font:getWidth(line)
+                end
+
+                if run.text:find("\n", 1, true) then
+                    cursorX = x
+                    cursorY = cursorY + lineHeight
+                end
+            end
+        end
+    end
+    local function drawColourRunsWithEffects(runs, x, y)
+        love.graphics.push()
+
+        love.graphics.translate(ox, oy)
+        love.graphics.rotate(math.rad(runtime.rotation or 0))
+        love.graphics.scale(runtime.scaleX or 1, runtime.scaleY or 1)
+        love.graphics.translate(-ox, -oy)
+
+        if shadowOffset > 0 then
+            love.graphics.setColor(0, 0, 0, a)
+            drawColourRuns(runs, x + shadowOffset, y + shadowOffset, "shadow")
+        end
+
+        if border > 0 then
+            for dx = -border, border do
+                for dy = -border, border do
+                    if dx ~= 0 or dy ~= 0 then
+                        drawColourRuns(runs, x + dx, y + dy, "border")
+                    end
+                end
+            end
+        end
+
+        drawColourRuns(runs, x, y, "normal")
+
+        love.graphics.pop()
+    end
+
     local padx = 10
     local pady = 4
     love.graphics.setColor(0, 0, 0, 0.7 * a)
@@ -403,7 +532,7 @@ function LyricsRenderer:draw(audioTime)
             cx = cx + segW
         end
     else
-        drawTextWithEffectsInternal(text, drawX, drawY)
+        drawColourRunsWithEffects(evt.colourRuns, drawX, drawY)
     end
     if runtime.underline then
         love.graphics.setColor(r, g, b, a)

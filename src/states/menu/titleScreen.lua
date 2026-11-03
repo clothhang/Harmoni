@@ -204,15 +204,16 @@ function titleScreen:enter(from, resetItems, fadeIn)
             )
         )
     end
-
     if resetItems then
-        print("HI")
         self:setUpThoseLinesThatIHate(10)
         self:setUpThoseWavesThatIHate(4)
         self:setUpThoseBubblesThatIHate(20)
-        self:setUpThoseSqauresThatIHate()
     end
+            self:setUpThoseSqauresThatIHate()
+
     self.thoseWeirdGrowingCirclesThatIHate = growingCircleObjectThingyIdfk()
+    self.UItrail = UItrail({{x = 0, y = 836}, {x = 582, y = 326}, {x = 297, y = 0}, {x = 297, y = -100}, {x = 1893, y = -100}, {x = 1893, y = 0}, {x = 1749, y = 413}, {x = 2559, y = 696}, {x = 2659, y = 696}, {x = 2659, y = 1101}, {x = 2559, y =1101}, {x = 2273,  y = 813}, {x = 1643, y = 1439}, {x = 1643, y = 1539}, {x = -100, y = 1540}, {x = -100, y = 836}}, 1000, 2, function() print("hi") end, false, 5)
+
 
     if self.coverAlpha > 0 then
         self:fadeIn(function()
@@ -257,6 +258,7 @@ end
 function titleScreen:fadeIn(callback)
     Timer.tween(0.25, self, {coverAlpha = 0}, "linear", callback)
 end
+
 
 function titleScreen:setUpThoseBubblesThatIHate(numberOfBubbles)
     self.bubbles = {}
@@ -367,6 +369,7 @@ end
 
 function titleScreen:update(dt)
     self.metaballs:update(dt)
+    self.UItrail:update(dt)
     fade = math.min(fade + dt*5, 1)
 
     for i, Button in ipairs(self.buttons) do
@@ -466,18 +469,21 @@ end
 
 function titleScreen:draw()
     love.graphics.draw(self.BG) -- TEMP 
+    
     self.metaballs:draw()
+    
     if self.awesomeSquare then self.awesomeSquare:draw() end
     self.thoseWeirdGrowingCirclesThatIHate:draw()
-    -- for i, Bubble in ipairs(self.bubbles) do
-    --     if not Bubble.isNote then
-    --        -- Bubble:draw()
-    --     else
-    --         love.graphics.setColor(Bubble.color)
-    --         love.graphics.draw(self.noteImage,Bubble.x,Bubble.y, math.rad(Bubble.rotation), 1+Bubble.squishX*(Bubble.radius/130), 1+Bubble.squishY*(Bubble.radius/130), self.noteImage:getWidth()/2, self.noteImage:getHeight()/2)
-    --     end
-    -- end
-    love.graphics.print("harmoni lol")
+    
+    for i, Bubble in ipairs(self.bubbles) do
+         if not Bubble.isNote then
+             Bubble:draw()
+         else
+             love.graphics.setColor(Bubble.color)
+             love.graphics.draw(self.noteImage,Bubble.x,Bubble.y, math.rad(Bubble.rotation), 1+Bubble.squishX*(Bubble.radius/130), 1+Bubble.squishY*(Bubble.radius/130), self.noteImage:getWidth()/2, self.noteImage:getHeight()/2)
+         end
+     end
+   -- love.graphics.print("harmoni lol")
 
     love.graphics.setColor(1,1,1,0.1)
     love.graphics.push()
@@ -499,7 +505,11 @@ function titleScreen:draw()
     for i, Button in ipairs(self.socialButtons) do
         Button:draw()
     end
+
+    self.UItrail:draw()
+
     self:drawLogo()
+
 
 
    -- love.graphics.draw(self.moth)
@@ -508,6 +518,8 @@ function titleScreen:draw()
     love.graphics.setColor(0,0,0,self.coverAlpha + screenFade[1])
     love.graphics.rectangle("fill", 0, 0 , baseScreenRatio.x, baseScreenRatio.y)
     love.graphics.setColor(1,1,1,1)
+
+    --]]
 end
 
 function titleScreen:drawLogo()
@@ -519,7 +531,7 @@ function titleScreen:drawLogo()
 
     love.graphics.draw(fullLogo, baseScreenRatio.x/2, baseScreenRatio.y/2-350, 0, fullLogoSizeX, fullLogoSizeY, fullLogoCenterX, fullLogoCenterY)
 
---    self.coolFuckingRectangle:draw()
+    --self.coolFuckingRectangle:draw()
 end
 
 return titleScreen

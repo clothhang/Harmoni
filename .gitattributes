@@ -6,3 +6,4 @@ src/clibs/Windowsx64/avfilter-11.dll filter=lfs diff=lfs merge=lfs -text eol=crl
 src/clibs/Windowsx64/avcodec-62.dll filter=lfs diff=lfs merge=lfs -text eol=crlf
 *.mp4 filter=lfs diff=lfs merge=lfs -text eol=crlf
 *.mov filter=lfs diff=lfs merge=lfs -text eol=crlf
+*.webm filter=lfs diff=lfs merge=lfs -text

@@ -11,8 +11,7 @@ PlayResY: 720
 
 [Aegisub Project Garbage]
 Audio File: audio.mp3
-Scroll Position: 99
-Active Line: 140
+Active Line: 4
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding

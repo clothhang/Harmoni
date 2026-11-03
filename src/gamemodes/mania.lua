@@ -173,7 +173,7 @@ function mania:setUpChart(chartpath, chart)
     }
 
     -- Setup video background if valid
-    if parsed.meta.backgroundVideo and self.mods["NVB"] then
+    if parsed.meta.backgroundVideo then
         self.videoBackground = video(
             songPath .. "/" .. parsed.meta.backgroundVideo,
             baseScreenRatio.x / 2,
@@ -368,10 +368,10 @@ function mania:updateObjects(dt)
     self.HUD:update(dt) -- we also gotta send values to the hud
     self.HUD:sendValues(self.scoreHandler:getScore("printable"), self.scoreHandler:getAccuracy("printable"))
 
-    --[[ if self.healthBar.health <= 0 and not self.mods["NF"] then
+     if self.healthBar.health <= 0 and not self.mods["NF"] then
         if AchievementHandler then AchievementHandler:unlock("failed song") end
         self:gameOver()
-    end ]]
+    end 
 
     if self.bpmHandler:wasBeatHit() then
         self:onBeat()

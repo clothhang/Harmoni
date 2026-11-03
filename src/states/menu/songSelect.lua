@@ -43,6 +43,10 @@ function songSelect:enter()
         dark = {0, 0, 0, 0.8}
     }
 
+
+    self.buttonBeatTweenValue = 0
+    self.buttonBeatTweenChange = -60
+    
     self.songThread = self.songThread or love.thread.newThread [[
 local oprint = print
 function print(...)
@@ -217,7 +221,7 @@ end
     self.modifiersMenu = modifiersMenu(20,400,600,670)
 
   --  self:checkForSongButtonClicks(false)
-    self.buttonBezierCurveMiddleXControlPoint = 100
+    self.buttonBezierCurveMiddleXControlPoint = 200
   self.buttonBezierCurve = love.math.newBezierCurve(baseScreenRatio.x, 0,
                                                     baseScreenRatio.x-self.buttonBezierCurveMiddleXControlPoint, baseScreenRatio.y/2,
                                                     baseScreenRatio.x, 0)
@@ -513,6 +517,19 @@ function songSelect:update(dt)
     self.modifiersMenu:update(dt)
     self.ignoreInterpolation = false
 
+
+
+    if self.bpmHandler:wasBeatHit() then
+        self.buttonBeatTweenValue = self.buttonBeatTweenChange
+        if self.buttonBeatTween then Timer.cancel(self.buttonBeatTween) end
+        self.buttonBeatTween = Timer.tween(0.1, self, {buttonBeatTweenValue = 0}, "out-quad")
+        
+    end
+
+    self.buttonBezierCurve = love.math.newBezierCurve(baseScreenRatio.x, 0,
+                                                    baseScreenRatio.x-self.buttonBezierCurveMiddleXControlPoint, baseScreenRatio.y/2,
+                                                    baseScreenRatio.x, 0)
+
     local modMenuTargetX = (self.menuState == "song" and -600) or 10
     self.modifiersMenu.x = self.modifiersMenu.x + (modMenuTargetX - self.modifiersMenu.x) * 10 * dt
     local BGDimTarget = (self.menuState == "song" and 0) or 0.7
@@ -620,7 +637,7 @@ function songSelect:updateSongButtons(dt)
         local targetY = (i * (songButtonHeight + songButtonSpacing)) + hoveredSong
         local targetX = (self.menuState == "song" and songButtonX) or baseScreenRatio.x + songButtonSpacing
         targetX = targetX + getBezierCurveEvalForSongButtonPosition(SongButton)
-        if i == selectedSong and self.menuState ~= "difficulty" then targetX = targetX - 50 end
+        if i == selectedSong and self.menuState ~= "difficulty" then targetX = targetX - 50 + self.buttonBeatTweenValue end
         if self.ignoreInterpolation then
             SongButton.y = targetY
         else
@@ -647,7 +664,7 @@ function songSelect:updateBGImage()
                     previousBG = currentDisplayedBG
                     currentDisplayedBG = SongButton.image
                     -- hell, just select the current song
-                    selectedSong = i     -- for what tho  
+                    selectedSong = i     -- for what tho      i still dont know
                     self.currentSongInfo = SongButton:returnInfo()
                     fadeBG()
                 end
@@ -856,6 +873,9 @@ function songSelect:draw(dt)
     for _, SongButton in ipairs(songButtons) do
         SongButton:draw()
     end
+
+
+--    love.graphics.line(self.buttonBezierCurve:render())
 
 
 

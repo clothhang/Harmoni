@@ -1,0 +1,25 @@
+[meta]
+creator:none lol
+backgroundFile:image.jpg
+backgroundVideo:video.webm
+bpm:82
+laneCount:4
+audioFile:audio.ogg
+chartOrigin:Quaver
+initialSV:1
+artist:PIPS
+gameMode:mania
+source:s
+songPreviewTime:105500
+tags:uhh
+title:LOVE IS WARRR
+difficultyName:funny lol
+
+[warnings]
+content:unfinishedSong
+content:nochart
+health:flashing
+
+[bpm]
+[sliderVelocities]
+[hitObjects]

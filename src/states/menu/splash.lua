@@ -6,9 +6,10 @@ function splash:enter()
     self.splashNumber = 1
     self.alpha = 0
     self.splashScreens = {
-        {screen = "beta", time = 2, msg = LocaleHandler:getText("Misc", "Is Beta")},
-        {screen = "headphones", time = 5, msg = LocaleHandler:getText("UI", "Headphones Recommended") .. "\n\n" .. LocaleHandler:getText("UI","Headphones Better"), img = love.graphics.newImage("images/menu/headphones.png")},
-   --     {screen = "crash", time = 5, msg = LocaleHandler:getText("Misc", "might fucking die")}
+        {screen = "beta", time = 1.5, msg = LocaleHandler:getText("Misc", "Is Beta")},
+        {screen = "headphones", time = 1.5, msg = LocaleHandler:getText("UI", "Headphones Recommended") .. "\n\n" .. LocaleHandler:getText("UI","Headphones Better"), img = love.graphics.newImage("images/menu/headphones.png")},
+        {screen = "FUCK ai", time = 1.5, msg = LocaleHandler:getText("Misc", "FUCK ai"), img = love.graphics.newImage("images/menu/FUCK ai.png")},
+       -- {screen = "crash", time = 5, msg = LocaleHandler:getText("Misc", "might fucking die")}
 
     }
     self:setupShit()
@@ -49,12 +50,14 @@ end
 function splash:draw()
     love.graphics.setColor(1,1,1,self.alpha)
     love.graphics.setFont(SkinHandler:getFont("Menu", 50))
-    love.graphics.printf(self.currentMessage or "", 0, baseScreenRatio.y/2-100, baseScreenRatio.x, "center")
+    love.graphics.printf(self.currentMessage or "", 0, self.currentImage and baseScreenRatio.y/2+20 or baseScreenRatio.y/2-130 , baseScreenRatio.x, "center")
     if self.currentImage and self.splashScreens[self.splashNumber].img then
         local image = self.currentImage
-        local x,y = baseScreenRatio.x/2, image:getHeight()/2+50
+        local x,y = baseScreenRatio.x/2, baseScreenRatio.y/2-20-image:getHeight()/2
         love.graphics.draw(image, x, y, nil, 1, 1, image:getWidth()/2, image:getHeight()/2)
     end
+
+    --love.graphics.line(0, baseScreenRatio.y/2, baseScreenRatio.x, baseScreenRatio.y/2)
 end
 
 return splash

@@ -59,6 +59,7 @@
     volumeControl = require("objects.UI.volumeControl")
     growingCircleObjectThingyIdfk = require("objects.UI.growingCircleObjectThingyIdfk")  -- this one is the most slop of all the UIslop i swear to god, i literally am stealing this from a vocaloid music video i saw,, and its my first time using bezier curves so im prob doing everuthing wrong
     growingSquare = require("objects.UI.growingAwesomeFuckingSQAURE!!!")
+    UItrail = require("objects.UI.trail")  -- CRAZY UIslop
 
     settingsbaseshitthingy = require("objects.settings.settingsbaseshitthingy")
     settingsTabButton = require("objects.settings.tabButton")

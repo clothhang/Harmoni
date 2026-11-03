@@ -20,7 +20,7 @@ function throbbert:new(colors)
     self:throb()
 end
 
-function throbbert:throb()  -- god why did they name these things "throbberts"
+function throbbert:throb()  -- god why did they name these things "throbbers"
     self.color = self.colors[love.math.random(1,#self.colors)]
     self.color2 = self.colors[love.math.random(1,#self.colors)]
     self.color3 = self.colors[love.math.random(1,#self.colors)]

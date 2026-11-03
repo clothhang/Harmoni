@@ -2,7 +2,8 @@ Language = {
     Misc = {
         ["Placeholder"] = "PLACEHOLDER",
         ["Is Beta"] = "I'm still in beta! Expect bugs!\n\nPlease report any bugs you find on GitHub,\nand consider donating to help with development! \n\nAny help with this game is appreciated!!",
-        ["might fucking die"] = "THE GAME MIGHT CRASH RIGHT AFTER THIS!!! IDK WHY BUT IF IT HAPPENS JUST RELAUNCH IT\n\n 😭😭😭😭 sorrry :("
+        ["might fucking die"] = "THE GAME MIGHT CRASH RIGHT AFTER THIS!!! IDK WHY BUT IF IT HAPPENS JUST RELAUNCH IT\n\n 😭😭😭😭 sorrry :(",
+        ["FUCK ai"] = "Everything in Harmoni was made by actual people.\nNot machines.\n\nKeep it that way."
     },
     Menu = {
         ["Play"] = "Play",

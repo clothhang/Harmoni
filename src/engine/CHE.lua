@@ -39,6 +39,10 @@ function printFOutline(outlineColor,outlineThickness,str,x,y,limit,align)
 end
 
 function CHE:init()
+
+    self.displayPrototypeBanner = true
+
+
     Fullscreen = false
     Console = require("engine.modules.console")
 
@@ -279,6 +283,18 @@ function CHE:draw(dt)
 
             if AchievementHandler then AchievementHandler:draw() end
 
+            if self.displayPrototypeBanner then
+                local text = "PROTOTYPE - Everything subject to change | Harmoni V." .. HarmoniVersion    -- i #stole dis idea from avg4k 🤑🤑🤑🤑🤑
+                if not self.protoypeBannerX then self.protoypeBannerX = baseScreenRatio.x+200 end
+                self.protoypeBannerX = self.protoypeBannerX - 250 * dt
+                if self.protoypeBannerX < -640 then self.protoypeBannerX = baseScreenRatio.x end
+                love.graphics.setColor(0,0,0,0.7)
+                love.graphics.rectangle("fill", 0, 20, baseScreenRatio.x, 30)
+                love.graphics.setFont(SkinHandler:getFont(defaultFont, 20))
+                love.graphics.setColor(1,1,1)
+                love.graphics.print(text, self.protoypeBannerX, 23)
+            end
+
             love.graphics.pop()
 
             love.graphics.setFont(startFont)
@@ -320,6 +336,7 @@ function CHE:draw(dt)
     if Console.visible then
         Console:draw()
     end
+    
 
     cursor:draw()
 
@@ -351,6 +368,8 @@ function CHE:draw(dt)
         love.graphics.rectangle("fill",0,0,love.graphics.getWidth(),love.graphics.getHeight())
         love.graphics.setColor(1,1,1,1)
     end
+
+
 end
 
 function CHE:exit() end

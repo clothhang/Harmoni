@@ -188,7 +188,7 @@ function lyricsDisplay:hitLyric(lyricIndex)
 end
 
 
-local function drawRichText(text, x, y, wrap)
+local function drawRichText(text, x, y, wrap, highlighted)
     text = tostring(text or "")
 
     local font = SkinHandler:getFont("Menu", 50) or love.graphics.getFont()
@@ -234,32 +234,59 @@ local function drawRichText(text, x, y, wrap)
         end
     end
 
-    for lineIndex, line in ipairs(lines) do
-        local cursorX = x
-        local cursorY = y + (lineIndex - 1) * lineHeight
-
+    local builtPrintString = {} -- {{r,g,b}, text, {r,g,b}, text}
+    for _, line in ipairs(lines) do
         for _, run in ipairs(line) do
             if run.colour then
                 local r, g, b = run.colour[1], run.colour[2], run.colour[3]
 
-                if prevR ~= 1 or prevG ~= 1 or prevB ~= 1 then
+                if not highlighted then
                     r = r * 0.6
                     g = g * 0.6
                     b = b * 0.6
                 end
-
-                love.graphics.setColor(r, g, b, prevA)
+                table.insert(builtPrintString, {r, g, b})
             else
-                love.graphics.setColor(prevR, prevG, prevB, prevA)
+                local r, g, b = 1, 1, 1
+                if not highlighted then
+                    r = r * 0.6
+                    g = g * 0.6
+                    b = b * 0.6
+                end
+                table.insert(builtPrintString, {r, g, b})
             end
 
-            love.graphics.print(run.text, cursorX, cursorY)
-            cursorX = cursorX + font:getWidth(run.text)
+            table.insert(builtPrintString, run.text)
         end
     end
 
+    -- for lineIndex, line in ipairs(lines) do
+    --     local cursorX = x
+    --     local cursorY = y + (lineIndex - 1) * lineHeight
+
+    --     for _, run in ipairs(line) do
+    --         if run.colour then
+    --             local r, g, b = run.colour[1], run.colour[2], run.colour[3]
+
+    --             if prevR ~= 1 or prevG ~= 1 or prevB ~= 1 then
+    --                 r = r * 0.6
+    --                 g = g * 0.6
+    --                 b = b * 0.6
+    --             end
+
+    --             love.graphics.setColor(r, g, b, prevA)
+    --         else
+    --             love.graphics.setColor(prevR, prevG, prevB, prevA)
+    --         end
+
+    --         love.graphics.print(run.text, cursorX, cursorY)
+    --         cursorX = cursorX + font:getWidth(run.text)
+    --     end
+    -- end
+    love.graphics.printf(builtPrintString, x, y, wrap, "left")
+
     love.graphics.setFont(previousFont)
-    love.graphics.setColor(prevR, prevG, prevB, prevA)
+    --love.graphics.setColor(prevR, prevG, prevB, prevA)
 end
 
 
@@ -280,18 +307,14 @@ function lyricsDisplay:draw()
     local font = SkinHandler:getFont("Menu", 50)
     love.graphics.setFont(font)
 
+    love.graphics.setColor(1, 1, 1)
     for i, Lyric in ipairs(self.lyrics) do
-        if self.currentLyric == i then
-            love.graphics.setColor(1, 1, 1)
-        else
-            love.graphics.setColor(0, 0, 0, 0.5)
-        end
-
         drawRichText(
             Lyric.text,
             Lyric.rectangle.x + 30,
-            Lyric.rectangle.y,
-            Lyric.rectangle.width - 30
+            Lyric.rectangle.y + 30,
+            Lyric.rectangle.width - 60,
+            self.currentLyric == i
         )
     end
 

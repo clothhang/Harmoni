@@ -153,7 +153,7 @@ end
 
 function video:draw()
     local lastColor = {love.graphics.getColor()}
-    love.graphics.setColor(lastColor[1], lastColor[2], lastColor[3], self.alpha * lastColor[4])
+    love.graphics.setColor(lastColor[1], lastColor[2], lastColor[3], (self.alpha or 1) * lastColor[4])
     if not self.video or not self.visible or not self.image then return end
 
     love.graphics.push()

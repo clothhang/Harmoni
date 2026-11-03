@@ -102,10 +102,12 @@ function jukebox:switchSong(songInfo)
         local targetSizeX = self.songBGWidth
         local targetSizeY = self.songBGHeight
 
-        self.songBG.scaleX = targetSizeX / self.songBG.image:getWidth()
-        self.songBG.scaleY = targetSizeY / self.songBG.image:getHeight()
-        self.songBG.x = self.songBGX + (targetSizeX / 2)
-        self.songBG.y = self.songBGY + (targetSizeY / 2)
+        if (self.songBG or {}).image then
+            self.songBG.scaleX = targetSizeX / self.songBG.image:getWidth()
+            self.songBG.scaleY = targetSizeY / self.songBG.image:getHeight()
+            self.songBG.x = self.songBGX + (targetSizeX / 2)
+            self.songBG.y = self.songBGY + (targetSizeY / 2)
+        end
 
         self.currentBGPos.x = self.songBG.x
         self.currentBGPos.y = self.songBG.y
@@ -269,6 +271,7 @@ function jukebox:update(dt)
                 info.name, info.artist, info.audio,
                 info.path, info.bg
             ))
+            table.sort(self.songButtons, function(a, b) return a.name < b.name end)
         end
     end
 

@@ -72,7 +72,7 @@ function lyricsDisplay:setUpLyrics()
 
     local currentY = self.y
     local lineHeight = font:getHeight()
-    local wrapLimit = self.lyricRectWidth - 30
+    local wrapLimit = self.lyricRectWidth - 60
 
     for _, Lyric in ipairs(self.lyrics) do
         local text = getPlainLyric(Lyric.text)
@@ -82,7 +82,7 @@ function lyricsDisplay:setUpLyrics()
 
         Lyric.rectangle = {
             x = self.x,
-            y = currentY,
+            y = currentY + 30,
             width = self.lyricRectWidth,
             height = textHeight
         }
@@ -312,7 +312,7 @@ function lyricsDisplay:draw()
         drawRichText(
             Lyric.text,
             Lyric.rectangle.x + 30,
-            Lyric.rectangle.y + 30,
+            Lyric.rectangle.y,
             Lyric.rectangle.width - 60,
             self.currentLyric == i
         )

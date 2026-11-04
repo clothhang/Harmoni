@@ -26,27 +26,25 @@ function songSelect:resetBpmShit(newBpm)
     self.bpmHandler:setBpm(newBpm or 100)
 end
 
-function songSelect:enter(prev,sSong)
-    print("################################" .. sSong)
-   -- selectedSong = selectedSong or sSong
-    print(selectedSong)
+function songSelect:enter(prev, sSong, fuckkk)
+    selectedSong = sSong
     self.debug = true
-    print()
-    
 
     self.bpmHandler = require("modules.game.bpm")
-
 
     self.currentSongInfo = {}
 
     self.songInfoY = 20
    -- selectedSong = 1
-    if prev == States.menu.titleScreen then selectedSong = States.menu.titleScreen.selectedSong print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$",States.menu.titleScreen.selectedSong) end
     switchingState = false
     self.colors = {
         light = {0, 0, 0, 0},
         dark = {0, 0, 0, 0.8}
     }
+
+    self.totalSongsToLoad = 0
+    self.loadedSongs = 0
+    self.allSongsLoaded = false
 
 
     self.buttonBeatTweenValue = 0
@@ -79,46 +77,43 @@ end
 local path, songInfo, folderPath, ok, err
 local loaded = false
 while true do
-    loaded = false
-    path = channel:demand()
-    if not path then goto continue end
+    local requestedPath = channel:demand()
 
-    if path == "exit" then
+    if requestedPath == "exit" then
         break
     end
 
-    if not love.filesystem.getInfo(path, "file") then 
-        goto continue 
-    else 
-        --songInfo = loadSongMetadata(path) 
-        ok, err = pcall(function() songInfo = loadSongMetadata(path) end)
-        if not ok then
-            print("ERROR: Failed to load song metadata from " .. path .. ": " .. err)
-            goto continue
+    if requestedPath then
+        local songInfo
+        local ok = false
+
+        if love.filesystem.getInfo(requestedPath, "file") then
+            ok, songInfo = pcall(loadSongMetadata, requestedPath)
+
+            if not ok then
+                print("ERROR: Failed to load song metadata from " .. requestedPath .. ": " .. tostring(songInfo))
+                songInfo = nil
+            end
         end
+
+        local path = requestedPath
+        if path:sub(-1) == "/" then
+            path = path:sub(1, -2)
+        end
+
+        path = path:gsub("^Music/", "")
+
+        local folderPath = (path:match("(.+)/[^/]+$") or "") .. "/"
+
+        outChannel:push({
+            path = path,
+            folderPath = folderPath,
+            songInfo = songInfo,
+            success = ok and songInfo ~= nil
+        })
     end
 
-    -- get folder path
-    -- e.g.  Music/33409 - 179/143301.qua.harmc/ -> Music/33409 - 179/
-    if string.sub(path, -1) == "/" then
-        path = string.sub(path, 1, -2)  -- remove trailing slash if it exists
-    end
-    -- if path starts with "Music/" then remove it
-    path = string.gsub(path, "^Music/", "")  -- remove "Music/" from the start of the path
-    folderPath = (path:match("(.+)/[^/]+$") or "") .. "/"  -- get everything before the last slash, or return empty string if no slashes found
-
-    outChannel:push({
-        path = path,
-        folderPath = folderPath,
-        songInfo = songInfo
-    })
-    
-    loaded = true
-
-    ::continue::
-    --if not loaded then
-        love.timer.sleep(0.03)
-    --end
+    love.timer.sleep(0.03)
 end
 ]]
 
@@ -207,11 +202,16 @@ end
     self.songThread:start()
 
     if #songList == 0 then
+        songButtons = {}
         self:setupSongList()
     else
         self:loadBanners()
-        self.currentSongInfo = songButtons[selectedSong]:returnInfo()
-        self:resetBpmShit(self.currentSongInfo.bpm or 100)
+
+        local selectedButton = songButtons[selectedSong]
+        if selectedButton then
+            self.currentSongInfo = selectedButton:returnInfo()
+            self:resetBpmShit(self.currentSongInfo.bpm or 100)
+        end
     end
     self:setUpThoseBubblesThatIHate(10)
     self:setUpThoseLinesThatIHate(11)
@@ -225,14 +225,31 @@ end
 
     self.modifiersMenu = modifiersMenu(20,400,600,670)
 
-  --  self:checkForSongButtonClicks(false)
+    --  self:checkForSongButtonClicks(false)
     self.buttonBezierCurveMiddleXControlPoint = 200
-  self.buttonBezierCurve = love.math.newBezierCurve(baseScreenRatio.x, 0,
-                                                    baseScreenRatio.x-self.buttonBezierCurveMiddleXControlPoint, baseScreenRatio.y/2,
-                                                    baseScreenRatio.x, 0)
+    self.buttonBezierCurve = love.math.newBezierCurve(baseScreenRatio.x, 0,
+        baseScreenRatio.x-self.buttonBezierCurveMiddleXControlPoint, baseScreenRatio.y/2,
+        baseScreenRatio.x, 0
+    )
 
-                                                        print(selectedSong)
+    if not fuckkk then
+        local selectedButton = songButtons[selectedSong]
 
+        if selectedButton then
+            self.currentSongInfo = selectedButton:returnInfo()
+            self:resetBpmShit(self.currentSongInfo.bpm or 100)
+
+            if self.currentAudio and self.currentAudio:isPlaying() then
+                self.currentLoopPoint = tonumber(self.currentSongInfo.songPreviewTime) or 0
+            elseif self.currentSongInfo.audioFile then
+                self:loadAudio(self.currentSongInfo.path .. "/" .. self.currentSongInfo.audioFile)
+                self.currentLoopPoint = tonumber(self.currentSongInfo.songPreviewTime) or 0
+            end
+            self.currentAudioVolume = 1
+        end
+
+        hoveredSong = baseScreenRatio.y / 2 - (selectedSong * (songButtonHeight + songButtonSpacing) - songButtonSpacing / 2)
+    end
 end
 
 function songSelect:setUpThoseLinesThatIHate(numberOfLines)
@@ -306,7 +323,7 @@ function songSelect:setupSongList()
         end
 
         self.songInputChannel:push(musicPath .. song .. "/" .. diffList[1] .. "/")
-
+        self.totalSongsToLoad = self.totalSongsToLoad + 1
         ::continue::
     end
 end
@@ -400,46 +417,55 @@ function songSelect:setupDifficultyList(path,color)
 end
 
 function songSelect:loadSongs()
-    if self.songChannel:peek() then
+    while self.songChannel:peek() do
         local data = self.songChannel:pop()
-        if data then
-            -- add to songButtons
-            local songInfo = data.songInfo
-            if songInfo then
-                local isNew = true
-                local settingsData
-                if love.filesystem.getInfo(musicPath .. data.folderPath .. "/settings.lua") then    -- this will work because if the file is missing, then the song def hasnt been played, and itll be created when starting the song for the first time (it shouldnt be possible for the file to be missing anyway tho)
-                    settingsData = love.filesystem.load(musicPath .. data.folderPath .. "/settings.lua")()
-                    if settingsData.playedBefore then isNew = false end
-                end
-                table.insert(songButtons, menuSongButton(
-                    self,
-                    songButtonWidth,songButtonHeight,songButtonX,(#songButtons+1)*(songButtonHeight+songButtonSpacing),
-                    songInfo.title,
-                    songInfo.artist,
-                    songInfo.charter,
-                    songInfo.bpm,
-                    musicPath .. data.folderPath .. (songInfo.backgroundFile or ""),
-                    false,
-                    songInfo.gameMode,
-                    musicPath .. data.folderPath,
-                    nil,
-                    nil,
-                    nil,
-                    songInfo.songPreviewTime,
-                    songInfo.audioFile,
-                    nil,
-                    isNew
-                ))
-            end
-            if not self.currentAudio and #songButtons == 1 then    -- this whole thing is so hacky but it works
-                -- now that we have created the first button, we call checkforsongbuttonclicks and i guess we just hope it works lmao 
-                self:checkForSongButtonClicks(false)
-                -- now we do smth even more hacky, just set the menustate to song
-                self.menuState = "song"
+        if not data then break end
+
+        self.loadedSongs = self.loadedSongs + 1
+
+        local songInfo = data.songInfo
+        if not songInfo then
+            goto continue
+        end
+
+        local isNew = true
+        local settingsPath = musicPath .. data.folderPath .. "/settings.lua"
+
+        if love.filesystem.getInfo(settingsPath) then
+            local settingsData = love.filesystem.load(settingsPath)()
+
+            if settingsData.playedBefore then
+                isNew = false
             end
         end
+
+        table.insert(songButtons, menuSongButton(
+            self,
+            songButtonWidth,
+            songButtonHeight,
+            songButtonX,
+            (#songButtons + 1) * (songButtonHeight + songButtonSpacing),
+            songInfo.title,
+            songInfo.artist,
+            songInfo.charter,
+            songInfo.bpm,
+            musicPath .. data.folderPath .. (songInfo.backgroundFile or ""),
+            false,
+            songInfo.gameMode,
+            musicPath .. data.folderPath,
+            nil,
+            nil,
+            nil,
+            songInfo.songPreviewTime,
+            songInfo.audioFile,
+            nil,
+            isNew
+        ))
+
+        ::continue::
     end
+
+    self.allSongsLoaded = self.loadedSongs >= self.totalSongsToLoad
 end
 
 local function getAverageColor(imageData)
@@ -488,127 +514,140 @@ function songSelect:loadSongButtonImages()
     end
 end
 
-function songSelect:update(dt)
-    if menuSongButton.alertInstance then menuSongButton.alertInstance:update(dt) end
-    self.bpmHandler:update(dt)
-    if self.currentAudio and self.currentAudio:isPlaying() then MusicTime = MusicTimeManager.updateMusicTime(MusicTime,dt) end
-    local mx,my = cursor:getPosition()
-    if Input:pressed("menuBack") then
-        if self.menuState == "difficulty" then self.menuState = "song"; return end
-      --  if switchingState then return end
+function songSelect:update(dt, onlyHandleSongs)
+    local mx,my
+    if not onlyHandleSongs then
+        if menuSongButton.alertInstance then menuSongButton.alertInstance:update(dt) end
+        self.bpmHandler:update(dt)
+        if self.currentAudio and self.currentAudio:isPlaying() then MusicTime = MusicTimeManager.updateMusicTime(MusicTime,dt) end
+        mx,my = cursor:getPosition()
+        if Input:pressed("menuBack") then
+            if self.menuState == "difficulty" then self.menuState = "song"; return end
+        --  if switchingState then return end
 
-        State.transition("waveDissolve", States.menu.titleScreen, function()
-            self:clearBanners()
-        end)
-        return
-    end
-    local lineBeatTimers = {}
-    for i, squiglyLine in ipairs(self.squiglyLines) do
-        squiglyLine:update(dt)
-        if self.bpmHandler:wasBeatHit() then
-            if lineBeatTimers[i] then Timer.cancel(lineBeatTimers[i]) end
-            lineBeatTimers[i] = Timer.tween(0.5, squiglyLine, {time = squiglyLine.time + 1}, "out-quad")
+            State.transition("waveDissolve", States.menu.titleScreen, function()
+                self:clearBanners()
+            end)
+            return
         end
-    end
+        local lineBeatTimers = {}
+        for i, squiglyLine in ipairs(self.squiglyLines) do
+            squiglyLine:update(dt)
+            if self.bpmHandler:wasBeatHit() then
+                if lineBeatTimers[i] then Timer.cancel(lineBeatTimers[i]) end
+                lineBeatTimers[i] = Timer.tween(0.5, squiglyLine, {time = squiglyLine.time + 1}, "out-quad")
+            end
+        end
 
-    if self.layerWaves then
-        self.layerWaves:update(dt)
+        if self.layerWaves then
+            self.layerWaves:update(dt)
+        end
+        self:updateBGImage()
+        self:checkForSongButtonClicks(true)
+        self:checkForDifficultyButtonClicks()
+        self:updateSongButtons(dt)
+        self:updateDifficultyButtons(dt)
     end
-    self:updateBGImage()
-    self:checkForSongButtonClicks(true)
-    self:checkForDifficultyButtonClicks()
-    self:updateSongButtons(dt)
-    self:updateDifficultyButtons(dt)
     self:loadSongs()
     self:loadSongButtonImages()
-    self:checkForSongLoop()
-    self.modifiersMenu:update(dt)
-    self.ignoreInterpolation = false
+    if not onlyHandleSongs then
+        self:checkForSongLoop()
+        self.modifiersMenu:update(dt)
+        self.ignoreInterpolation = false
 
 
-
-    if self.bpmHandler:wasBeatHit() then
-        self.buttonBeatTweenValue = self.buttonBeatTweenChange
-        if self.buttonBeatTween then Timer.cancel(self.buttonBeatTween) end
-        self.buttonBeatTween = Timer.tween(0.1, self, {buttonBeatTweenValue = 0}, "out-quad")
-        
-    end
-
-    self.buttonBezierCurve = love.math.newBezierCurve(baseScreenRatio.x, 0,
-                                                    baseScreenRatio.x-self.buttonBezierCurveMiddleXControlPoint, baseScreenRatio.y/2,
-                                                    baseScreenRatio.x, 0)
-
-    local modMenuTargetX = (self.menuState == "song" and -600) or 10
-    self.modifiersMenu.x = self.modifiersMenu.x + (modMenuTargetX - self.modifiersMenu.x) * 10 * dt
-    local BGDimTarget = (self.menuState == "song" and 0) or 0.7
-    BGDarkness = BGDarkness + (BGDimTarget - BGDarkness) * 10 * dt
-
-    self.logoCircle:update(dt)
-    self.logoCircleFill:update(dt)
-
-    self.logoCircle.rotation = self.logoCircle.rotation +5*dt
-
-    if self.bpmHandler:wasBeatHit() then
-        if self.beatLogoCircleTween then Timer.cancel(self.beatLogoCircleTween);Timer.cancel(self.logoHSizeBeatTween) end
-        self.beatLogoCircleTween = Timer.tween(0.5, self.logoCircle, {rotation = self.logoCircle.rotation + 10}, "out-quad")
-        self.logoH.sx, self.logoH.sy = 0.18, 0.18
-        self.logoHSizeBeatTween = Timer.tween(0.5, self.logoH, {sx = 0.17, sy = 0.17}, "out-quad")
-
-    end
-
-    if math.abs(mx - self.logoCircle.x) < self.logoCircle.radius and math.abs(my - self.logoCircle.y) < self.logoCircle.radius then
-        if Input:pressed("menuClickLeft") then
-            Timer.tween(2, self.logoCircle, {rotation = self.logoCircle.rotation + 30}, "out-quad")
-        end
-    end
-    local bubbleBeatTimers = {}
-    self.logoCircleFill.rotation = self.logoCircle.rotation -- why do the calculations twice?
-    for i, Bubble in ipairs(self.bubbles) do
-        Bubble:update(dt)
-                Bubble.rotation = Bubble.rotation + math.cos(love.timer.getTime() * 0.5 + i) * 30 * dt
-
-        Bubble.x, Bubble.y = Bubble.x + math.sin(love.timer.getTime() * 0.5 + i) * 30 * dt, Bubble.y - 10 * dt
 
         if self.bpmHandler:wasBeatHit() then
-            self.bubbleTimerBooleanIdk = self.bubbleTimerBooleanIdk or false
-            if bubbleBeatTimers[i] then Timer.cancel(bubbleBeatTimers[i]) end
+            self.buttonBeatTweenValue = self.buttonBeatTweenChange
+            if self.buttonBeatTween then Timer.cancel(self.buttonBeatTween) end
+            self.buttonBeatTween = Timer.tween(0.1, self, {buttonBeatTweenValue = 0}, "out-quad")
+            
+        end
 
-                bubbleBeatTimers[i] = Timer.tween(0.5, Bubble, {y = Bubble.y - 30}, "out-quad")
+        self.buttonBezierCurve = love.math.newBezierCurve(baseScreenRatio.x, 0,
+                                                        baseScreenRatio.x-self.buttonBezierCurveMiddleXControlPoint, baseScreenRatio.y/2,
+                                                        baseScreenRatio.x, 0)
+
+        local modMenuTargetX = (self.menuState == "song" and -600) or 10
+        self.modifiersMenu.x = self.modifiersMenu.x + (modMenuTargetX - self.modifiersMenu.x) * 10 * dt
+        local BGDimTarget = (self.menuState == "song" and 0) or 0.7
+        BGDarkness = BGDarkness + (BGDimTarget - BGDarkness) * 10 * dt
+
+        self.logoCircle:update(dt)
+        self.logoCircleFill:update(dt)
+
+        self.logoCircle.rotation = self.logoCircle.rotation +5*dt
+
+        if self.bpmHandler:wasBeatHit() then
+            if self.beatLogoCircleTween then Timer.cancel(self.beatLogoCircleTween);Timer.cancel(self.logoHSizeBeatTween) end
+            self.beatLogoCircleTween = Timer.tween(0.5, self.logoCircle, {rotation = self.logoCircle.rotation + 10}, "out-quad")
+            self.logoH.sx, self.logoH.sy = 0.18, 0.18
+            self.logoHSizeBeatTween = Timer.tween(0.5, self.logoH, {sx = 0.17, sy = 0.17}, "out-quad")
 
         end
-        Bubble.y = Bubble.y + math.cos(love.timer.getTime() * 0.5 + i) * 30 * dt
-        if Bubble.x > baseScreenRatio.x + Bubble.radius+10 then Bubble.x = -Bubble.radius+10
-        elseif Bubble.x < -Bubble.radius+10 then Bubble.x = baseScreenRatio.x + Bubble.radius+10 end
-        
-        if Bubble.y < -Bubble.radius+10 then Bubble.y = baseScreenRatio.y + Bubble.radius+10 end
+
+        if math.abs(mx - self.logoCircle.x) < self.logoCircle.radius and math.abs(my - self.logoCircle.y) < self.logoCircle.radius then
+            if Input:pressed("menuClickLeft") then
+                Timer.tween(2, self.logoCircle, {rotation = self.logoCircle.rotation + 30}, "out-quad")
+            end
+        end
+        local bubbleBeatTimers = {}
+        self.logoCircleFill.rotation = self.logoCircle.rotation -- why do the calculations twice?
+        for i, Bubble in ipairs(self.bubbles) do
+            Bubble:update(dt)
+                    Bubble.rotation = Bubble.rotation + math.cos(love.timer.getTime() * 0.5 + i) * 30 * dt
+
+            Bubble.x, Bubble.y = Bubble.x + math.sin(love.timer.getTime() * 0.5 + i) * 30 * dt, Bubble.y - 10 * dt
+
+            if self.bpmHandler:wasBeatHit() then
+                self.bubbleTimerBooleanIdk = self.bubbleTimerBooleanIdk or false
+                if bubbleBeatTimers[i] then Timer.cancel(bubbleBeatTimers[i]) end
+
+                    bubbleBeatTimers[i] = Timer.tween(0.5, Bubble, {y = Bubble.y - 30}, "out-quad")
+
+            end
+            Bubble.y = Bubble.y + math.cos(love.timer.getTime() * 0.5 + i) * 30 * dt
+            if Bubble.x > baseScreenRatio.x + Bubble.radius+10 then Bubble.x = -Bubble.radius+10
+            elseif Bubble.x < -Bubble.radius+10 then Bubble.x = baseScreenRatio.x + Bubble.radius+10 end
+            
+            if Bubble.y < -Bubble.radius+10 then Bubble.y = baseScreenRatio.y + Bubble.radius+10 end
+        end
+
+        local totalSongListHeight = #songButtons * (songButtonHeight + songButtonSpacing)
+        local minHoveredSong = -totalSongListHeight + songButtonHeight + songButtonSpacing * 2
+        local maxHoveredSong = songButtonSpacing * 2
+    --  hoveredSong = math.max(math.min(hoveredSong, maxHoveredSong), minHoveredSong)
+
+
+
+        if self.window then self.window:update(dt) end
+
+        if self.previousSong then self.previousSong:setVolume(self.previousAudioVolume or 0) end
+        if self.currentAudio then self.currentAudio:setVolume(self.currentAudioVolume or 1) end
+    end
+    
+    if self.loadedSongs >= self.totalSongsToLoad then
+        self.allSongsLoaded = true
     end
 
-    local totalSongListHeight = #songButtons * (songButtonHeight + songButtonSpacing)
-    local minHoveredSong = -totalSongListHeight + songButtonHeight + songButtonSpacing * 2
-    local maxHoveredSong = songButtonSpacing * 2
-  --  hoveredSong = math.max(math.min(hoveredSong, maxHoveredSong), minHoveredSong)
-
-
-
-    if self.window then self.window:update(dt) end
-
-    if self.previousSong then self.previousSong:setVolume(self.previousAudioVolume or 0) end
-    if self.currentAudio then self.currentAudio:setVolume(self.currentAudioVolume or 0) end
+    return self.allSongsLoaded
 end
 
 function songSelect:checkForSongLoop()
-    if not self.currentLoopPoint then return end
     if not self.currentAudio then return end
 
+    local loopPoint = tonumber(self.currentLoopPoint)
+    if not loopPoint or loopPoint <= 0 then return end
 
-    if self.currentAudio:tell("seconds")*1000 < tonumber(self.currentLoopPoint) then -- we need to seek to the loop point 
-        self.currentAudio:seek(self.currentLoopPoint/1000)
+    local duration = self.currentAudio:getDuration("seconds") * 1000
+    if duration <= 0 or loopPoint >= duration then return end
+
+    if self.currentAudio:tell("seconds") * 1000 < loopPoint then
+        self.currentAudio:seek(loopPoint / 1000)
         MusicTime = self.currentAudio:tell()
-        -- this is where that one bug happens,,, idk what to try to fix this really..
-        if not (self.currentAudio:tell("seconds")*1000 < tonumber(self.currentLoopPoint)) then-- we just check the same conditions again and if it still is true we dont set the bpm
+
+        if self.bpmHandler then
             self:resetBpmShit(self.currentSongInfo.bpm or 100)
-        else
-           -- self:loadAudio(self.currentSongInfo.path .. "/" .. self.currentSongInfo.audioFile)       -- oh my god my fucking ears do NOT uncomment this line 😭😭😭
         end
     end
 end

@@ -4,9 +4,61 @@ local screenFade = {0}
 
 local btnStrEasterEgg = "X"
 function titleScreen:enter(from, resetItems, fadeIn)
+    self.songList = SongListManager.getSongList(musicPath)
 
-    self.songList = SongListManager.getSongList()
-    self.selectedSong = love.math.random(1,#self.songList)
+    local validSongs = {}
+    local songsWithAudio = {}
+
+    for _, song in ipairs(self.songList) do
+        local diffList = SongListManager.getDifficultyList(musicPath .. song)
+
+        if diffList[1] and love.filesystem.getInfo(musicPath .. song .. "/" .. diffList[1], "file") then
+            local songInfo = ChartParse.harmcMeta(musicPath .. song .. "/" .. diffList[1] .. "/")
+
+            if songInfo then
+                table.insert(validSongs, song)
+
+                if songInfo.audioFile and love.filesystem.getInfo(musicPath .. song .. "/" .. songInfo.audioFile, "file") then
+                    table.insert(songsWithAudio, {
+                        index = #validSongs,
+                        info = songInfo,
+                        path = musicPath .. song .. "/" .. songInfo.audioFile
+                    })
+                end
+            end
+        end
+    end
+
+    self.songList = validSongs
+    self.selectedSong = 1
+    self.currentSongInfo = {}
+
+    local songSelect = States.menu.songSelect
+
+    if songSelect.currentPlayingSong then
+        self.selectedSong = songSelect.currentPlayingSong
+        self.currentSongInfo = songSelect.currentSongInfo or {}
+    elseif #songsWithAudio > 0 then
+        local selected = songsWithAudio[love.math.random(1, #songsWithAudio)]
+
+        self.selectedSong = selected.index
+        self.currentSongInfo = selected.info
+
+        songSelect.currentLoopPoint = tonumber(selected.info.songPreviewTime) or 0
+        songSelect.currentAudio = love.audio.newSource(selected.path, "stream")
+        songSelect.currentAudio:setVolume(1)
+        songSelect.currentAudio:setLooping(true)
+        songSelect.currentAudioVolume = 1
+        songSelect.previousAudioVolume = 0
+        songSelect.currentPlayingSong = selected.index
+        songSelect.currentSongInfo = selected.info
+        songSelect.currentAudio:play()
+    end
+
+    if songSelect.currentAudio and not songSelect.currentAudio:isPlaying() then
+        songSelect.currentAudio:play()
+    end
+
     fade = 0
     self.bubbleClickedCount = 0
     self.coverAlpha = (fadeIn and 1) or 0
@@ -38,7 +90,7 @@ function titleScreen:enter(from, resetItems, fadeIn)
             func = function() 
                 self:raiseWaves()
              --  State.transition("waveDissolve", States.menu.songSelect, function() print("FUCK YOU") end, 2)
-             State.switch(States.menu.songSelect, 2)    -- TEMP UNTIL STATE.TRANSITION IS FIXED!!!
+             State.transition("waveDissolve", States.menu.songSelect, nil, self.selectedSong)    -- TEMP UNTIL STATE.TRANSITION IS FIXED!!!
             end,
             color1 = {94/255,252/255,141/255,1},
             color2 = {44/255,251/255,106/255,0},
@@ -396,11 +448,14 @@ function titleScreen:update(dt)
 
     self:updateBubbles(dt) 
 
-        if self.awesomeSquare then self.awesomeSquare:update(dt) end
-        self.thoseWeirdGrowingCirclesThatIHate:update(dt)
+    if self.awesomeSquare then self.awesomeSquare:update(dt) end
+    self.thoseWeirdGrowingCirclesThatIHate:update(dt)
 
 
-
+    if States.menu.songSelect.currentAudio then
+        MusicTime = States.menu.songSelect.currentAudio:tell()
+    end
+    States.menu.songSelect:checkForSongLoop()
 end
 
 function titleScreen:updateBubbles(dt)

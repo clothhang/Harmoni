@@ -23,6 +23,11 @@ local canvas = nil
 
 local callback = nil
 
+local unpack = table.unpack or unpack
+local pack = table.pack or function(...)
+    return {n = select("#", ...), ...}
+end
+
 -- Internal switch logic
 local function switch(newstate, ...)
     if current and current.exit then
@@ -110,60 +115,66 @@ function state.addTransition(name, file)
 end
 
 function state.transition(name, newstate, cb, ...)
-    transitionArgs = {...}
-    if type(cb) ~= "function" then
-        -- its an argument
-        transitionArgs = {cb, ...}
-        cb = nil
-    else
-        callback = cb
-    end
     assert(type(name) == "string", "Called state.transition with invalid transition name")
     assert(type(newstate) == "table", "Called state.transition with invalid newstate")
 
     local transition = state.__transitions[name]
     assert(transition, "Transition not found: " .. name)
 
+    if type(cb) == "function" then
+        callback = cb
+        transitionArgs = pack(...)
+    else
+        callback = nil
+        transitionArgs = pack(...)
+
+        if cb ~= nil then
+            transitionArgs = pack(cb, unpack(transitionArgs, 1, transitionArgs.n))
+        end
+    end
+
     activeTransition = transition()
     transitionTarget = newstate
 
     if activeTransition.enter then
-        activeTransition:enter(current, newstate, ...)
+        activeTransition:enter(current, newstate, unpack(transitionArgs, 1, transitionArgs.n))
     end
 end
 
 function state.completeTransition()
     if not activeTransition then return end
+
     local newstate = transitionTarget
-    local args = transitionArgs
+    local args = transitionArgs or {n = 0}
 
     if activeTransition.endTransition then
-        switch(newstate, nil, unpack(args))
+        local nextTransition = activeTransition.endTransition
 
-        local nextTransitionLoader = love.filesystem.load(activeTransition.endTransition)
+        switch(newstate, unpack(args, 1, args.n))
+
+        local nextTransitionLoader = love.filesystem.load(nextTransition)
         if not nextTransitionLoader then
-            error("Failed to load endTransition: " .. tostring(activeTransition.endTransition))
+            error("Failed to load endTransition: " .. tostring(nextTransition))
         end
 
         activeTransition = nextTransitionLoader()
         activeTransition.endTransition = nil
 
         if activeTransition.enter then
-            activeTransition:enter(current, newstate, unpack(args))
+            activeTransition:enter(current, newstate, unpack(args, 1, args.n))
         end
 
-        return nil
+        return
     end
 
     if callback then
-        callback(newstate, unpack(args))
-        callback = nil
+        callback(newstate, unpack(args, 1, args.n))
     end
 
     activeTransition = nil
     transitionTarget = nil
     transitionArgs = nil
-    return nil
+    callback = nil
 end
 
 function state.killTransition()

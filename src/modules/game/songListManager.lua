@@ -2,10 +2,29 @@ local SongListManager = {}
 
 function SongListManager.getSongList(path)
     path = path or "Music/"
+
     if not love.filesystem.getInfo(path, "directory") then
         return {}
     end
-    return love.filesystem.getDirectoryItems(path)
+
+    local songList = {}
+
+    for _, item in ipairs(love.filesystem.getDirectoryItems(path)) do
+        local itemPath = path .. item
+
+        if love.filesystem.getInfo(itemPath, "directory") then
+            local files = love.filesystem.getDirectoryItems(itemPath)
+
+            for _, file in ipairs(files) do
+                if getFileExtension(file) == "harmc" then
+                    table.insert(songList, item)
+                    break
+                end
+            end
+        end
+    end
+
+    return songList
 end
 
 function SongListManager.getDifficultyList(path)

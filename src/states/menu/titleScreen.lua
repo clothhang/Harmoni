@@ -4,6 +4,9 @@ local screenFade = {0}
 
 local btnStrEasterEgg = "X"
 function titleScreen:enter(from, resetItems, fadeIn)
+
+    self.songList = SongListManager.getSongList()
+    self.selectedSong = love.math.random(1,#self.songList)
     fade = 0
     self.bubbleClickedCount = 0
     self.coverAlpha = (fadeIn and 1) or 0
@@ -34,7 +37,8 @@ function titleScreen:enter(from, resetItems, fadeIn)
             label = LocaleHandler:getText("Menu", "Play"), 
             func = function() 
                 self:raiseWaves()
-                State.transition("waveDissolve", States.menu.songSelect) 
+             --  State.transition("waveDissolve", States.menu.songSelect, function() print("FUCK YOU") end, 2)
+             State.switch(States.menu.songSelect, 2)    -- TEMP UNTIL STATE.TRANSITION IS FIXED!!!
             end,
             color1 = {94/255,252/255,141/255,1},
             color2 = {44/255,251/255,106/255,0},

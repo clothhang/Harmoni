@@ -6,7 +6,6 @@ local difficultyButtons = {}
 local songButtonWidth = 780
 local songButtonHeight = 97.5
 local songButtonSpacing = 15
-local selectedSong = 1
 local hoveredSong = 0
 local BGAlpha = {1}
 
@@ -27,8 +26,13 @@ function songSelect:resetBpmShit(newBpm)
     self.bpmHandler:setBpm(newBpm or 100)
 end
 
-function songSelect:enter()
+function songSelect:enter(prev,sSong)
+    print("################################" .. sSong)
+   -- selectedSong = selectedSong or sSong
+    print(selectedSong)
     self.debug = true
+    print()
+    
 
     self.bpmHandler = require("modules.game.bpm")
 
@@ -36,7 +40,8 @@ function songSelect:enter()
     self.currentSongInfo = {}
 
     self.songInfoY = 20
-    -- selectedSong = 1
+   -- selectedSong = 1
+    if prev == States.menu.titleScreen then selectedSong = States.menu.titleScreen.selectedSong print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$",States.menu.titleScreen.selectedSong) end
     switchingState = false
     self.colors = {
         light = {0, 0, 0, 0},
@@ -225,6 +230,9 @@ end
   self.buttonBezierCurve = love.math.newBezierCurve(baseScreenRatio.x, 0,
                                                     baseScreenRatio.x-self.buttonBezierCurveMiddleXControlPoint, baseScreenRatio.y/2,
                                                     baseScreenRatio.x, 0)
+
+                                                        print(selectedSong)
+
 end
 
 function songSelect:setUpThoseLinesThatIHate(numberOfLines)
@@ -643,7 +651,7 @@ function songSelect:updateSongButtons(dt)
         else
             SongButton.y = SongButton.y + (targetY - SongButton.y) * speed * dt
         end
-        SongButton.x = SongButton.x + (targetX - SongButton.x) * speed * dt
+        SongButton.x = SongButton.x + (targetX - SongButton.x) * speed*2.3 * dt
 
         SongButton:update(dt)
     end

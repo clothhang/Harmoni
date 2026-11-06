@@ -44,7 +44,7 @@ function titleScreen:enter(from, resetItems, fadeIn)
         self.selectedSong = selected.index
         self.currentSongInfo = selected.info
 
-        songSelect.currentLoopPoint = tonumber(selected.info.songPreviewTime) or 0
+        songSelect.currentLoopPoint = 0 -- tonumber(selected.info.songPreviewTime) or 0
         songSelect.currentAudio = love.audio.newSource(selected.path, "stream")
         songSelect.currentAudio:setVolume(1)
         songSelect.currentAudio:setLooping(true)

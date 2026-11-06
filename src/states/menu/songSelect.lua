@@ -642,7 +642,7 @@ function songSelect:checkForSongLoop()
     local duration = self.currentAudio:getDuration("seconds") * 1000
     if duration <= 0 or loopPoint >= duration then return end
 
-    if self.currentAudio:tell("seconds") * 1000 < loopPoint then
+    if self.currentAudio:tell("seconds")*1000 > loopPoint-1 and self.currentAudio:tell("seconds") * 1000 < loopPoint then
         self.currentAudio:seek(loopPoint / 1000)
         MusicTime = self.currentAudio:tell()
 
@@ -650,6 +650,9 @@ function songSelect:checkForSongLoop()
             self:resetBpmShit(self.currentSongInfo.bpm or 100)
         end
     end
+
+
+    
 end
 
 function songSelect:mousemoved()
@@ -758,6 +761,8 @@ function songSelect:loadAudio(path)  -- this needs to be threaded but im stupid
     -- this is sorta hacky, but itll work 
     -- we set the song to loop, and just check if its before the preview time, if it does, we seek to the preview time, itll play till the end, loop, then seek again
     self.currentAudio:setLooping(true)
+
+    self.currentAudio:seek(self.currentLoopPoint/1000)
 end
 
 
@@ -790,10 +795,11 @@ function songSelect:checkForSongButtonClicks(requireClick)
                 self:resetBpmShit(self.currentSongInfo.bpm or 100)
                 buttonInfo = SongButton:onClick()
                 local uhhhOtherStuffIdk = SongButton:returnInfo()
+                self.currentLoopPoint = uhhhOtherStuffIdk.songPreviewTime
+
                 if self.currentPlayingSong ~= i then self:loadAudio(self.currentSongInfo.path .. "/" .. self.currentSongInfo.audioFile) end
                 self.currentPlayingSong = i
 
-                self.currentLoopPoint = uhhhOtherStuffIdk.songPreviewTime
                 if selectedSong ~= i then selectedSong = i return end
                 if AchievementHandler then AchievementHandler:unlock("select song") end
                 self.menuState = "difficulty"

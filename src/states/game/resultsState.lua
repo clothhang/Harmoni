@@ -67,7 +67,7 @@ function resultsState:update(dt)
 end
 
 function resultsState:draw()
-    self.background:draw()
+    if self.background then self.background:draw() end
 
 
 

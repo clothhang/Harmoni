@@ -20,6 +20,8 @@ if IS_DEBUG then
 	end
 end
 
+IS_DEBUG = IS_DEBUG or not love.filesystem.isFused()
+
 -- TODO: Update deprecations to the new stuff
 love.setDeprecationOutput(false)
 
@@ -167,6 +169,24 @@ function love.mousereleased(x, y, b)
 end
 
 function love.keypressed(key, scancode, isrepeat)
+    if IS_DEBUG and key == "-" then
+        State.switch(States.game.resultsState, {
+            scoreHandler = { Scores = {
+                trueAccuracy =  100,
+                trueScore = 500000,
+                truePerformanceRating = 10
+            }},
+            hits = {10, 20, 30, 40, 30, 20, 10, 0, -10, -20, -30},
+            judgementCount = { judgements = {
+                {name = "1", count = 10},
+                {name = "2", count = 10},
+                {name = "3", count = 10},
+                {name = "4", count = 10},
+                {name = "5", count = 10},
+                {name = "6", count = 10},
+            }}
+        })
+    end
     CHE:keypressed(key, scancode, isrepeat)
 end
 

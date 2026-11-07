@@ -8,49 +8,42 @@ function resultsCircle:new(x,y,percent)
     self.emptyImage = SkinHandler:getImage("Results", "Circle Empty")
     self.fillImage = SkinHandler:getImage("Results", "Circle Fill")
 
+    self.scoreTickSound = love.audio.newSource("Sounds/scoreTick.ogg", "static")
+
     self.x, self.y = x,y
 
-    self.arcCanvas = love.graphics.newCanvas(2560, 1440)
+    self.percent = 100 
+    self.doingTween = true
 
-    self.percent = 100
-
-    Timer.tween(1, self, {percent = 0}, "linear", function() Timer.tween(1, self, {percent = 100}) end)
+    Timer.tween(1, self, {percent = 0}, "linear", function() Timer.tween(1, self, {percent = 100}); self.doingTween = false end)
 end
 
 function resultsCircle:update(dt)
+    if self.doingTween and self.percent%2 == 0 then
+        local clone = self.scoreTickSound:clone()
+        clone:play()
+        print("click")
+    end
 end
 
 function resultsCircle:draw()
-    love.graphics.push()
-        
-        love.graphics.draw(self.emptyImage, self.x, self.y, nil, 1, 1, self.emptyImage:getWidth()/2, self.emptyImage:getHeight()/2)
+    love.graphics.draw(self.emptyImage, self.x, self.y, nil, 1, 1, self.emptyImage:getWidth()/2, self.emptyImage:getHeight()/2)
 
-        -- this is hacky as FUCK
-        local bullshitttttt = remap(self.percent, 0, 100, 100, 0)
+    -- this is hacky as FUCK
+    local bullshitttttt = remap(self.percent, 0, 100, 100, 0)
 
-        local arc2val = remap(100-self.percent, 0, 100, 37, -217)
+    local arc2val = remap(bullshitttttt, 0, 100, 37, -217)
+    --print(arc2val)
 
-        self.arcCanvas:renderTo(function()
-            love.graphics.clear()
-            love.graphics.arc("fill", "pie", self.x-(baseScreenRatio.x/2), self.y, 372, math.rad(arc2val), math.rad(-217))
-        end)
+    -- min is 37, max is -217
+    love.graphics.stencil(function() 
+    love.graphics.arc("fill", "pie", self.x, self.y, 372, math.rad(-217), math.rad(arc2val))
+    end, "replace", 1)
 
-        -- min is 37, max is -217
-        love.graphics.stencil(function() 
-            love.graphics.push()
-            love.graphics.scale(-1,1)
-            love.graphics.draw(self.arcCanvas)
-            love.graphics.pop()
-        end, replace, 1)
+    love.graphics.setStencilTest("notequal", 1)
+    love.graphics.draw(self.fillImage, self.x, self.y, nil, 1, 1, self.emptyImage:getWidth()/2, self.emptyImage:getHeight()/2)
+    love.graphics.setStencilTest()
 
-        love.graphics.setStencilTest("notequal", 1)
-        love.graphics.draw(self.fillImage, self.x, self.y, nil, 1, 1, self.emptyImage:getWidth()/2, self.emptyImage:getHeight()/2)
-        love.graphics.setStencilTest()
-
-    love.graphics.pop()
 end
 
 return resultsCircle
-
-
-

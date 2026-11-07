@@ -8,19 +8,22 @@ function resultsCircle:new(x,y,percent)
     self.emptyImage = SkinHandler:getImage("Results", "Circle Empty")
     self.fillImage = SkinHandler:getImage("Results", "Circle Fill")
 
-    self.scoreTickSound = love.audio.newSource("Sounds/scoreTick.ogg", "static")
+    self.scoreTickSound = love.audio.newSource("sounds/scoreTick.ogg", "static")
 
     self.x, self.y = x,y
 
-    self.percent = 100 
+    self.printablePercent = 0 
+    self.percent = percent
     self.doingTween = true
 
-    Timer.tween(1, self, {percent = 0}, "linear", function() Timer.tween(1, self, {percent = 100}); self.doingTween = false end)
+    Timer.tween(3, self, {printablePercent = self.percent}, "out-quint", function() self.doingTween = false end)
 end
 
 function resultsCircle:update(dt)
-    if self.doingTween and self.percent%2 == 0 then
+    if self.doingTween and math.floor(self.printablePercent)%2 == 0 then
         local clone = self.scoreTickSound:clone()
+        local pitch = remap(self.printablePercent, 0, 100, 0.7, 1)
+        clone:setPitch(pitch)
         clone:play()
         print("click")
     end
@@ -30,7 +33,7 @@ function resultsCircle:draw()
     love.graphics.draw(self.emptyImage, self.x, self.y, nil, 1, 1, self.emptyImage:getWidth()/2, self.emptyImage:getHeight()/2)
 
     -- this is hacky as FUCK
-    local bullshitttttt = remap(self.percent, 0, 100, 100, 0)
+    local bullshitttttt = remap(self.printablePercent, 0, 100, 100, 0)
 
     local arc2val = remap(bullshitttttt, 0, 100, 37, -217)
     --print(arc2val)

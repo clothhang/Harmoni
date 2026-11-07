@@ -38,7 +38,7 @@ function resultsState:enter(s, parent)
     self.background = parent.background
 
 
-    self.resultsCircle = resultsCircle(716,720,82)
+    self.resultsCircle = resultsCircle(716,720,100)
 
     self.cornerRadius = 7
 
@@ -64,6 +64,7 @@ function resultsState:enter(s, parent)
 end
 
 function resultsState:update(dt)
+    self.resultsCircle:update(dt)
 end
 
 function resultsState:draw()
@@ -118,7 +119,6 @@ function resultsState:draw()
 
     for i = 1,#self.stats do
         local text
-        print(i)
         if i == 1 then
             text = self.stats[i].text
         else
@@ -129,7 +129,6 @@ function resultsState:draw()
 
     for i = 1,#self.judge do
         local text
-        print(i)
         if i == 1 then
             text = self.judge[i].text
         else

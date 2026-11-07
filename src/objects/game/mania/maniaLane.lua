@@ -104,6 +104,7 @@ function maniaLane:handleInput()
     if not note then return end
 
     local timeDiff = math.abs(MusicTime - note.startTime)
+
     if not self.parent.parent.mods["BP"] then
         for _, judgement in ipairs(mania.judgements) do
             if timeDiff <= judgement.timing and timeDiff < bestTimeDiff then
@@ -150,6 +151,7 @@ function maniaLane:handleInput()
 
             if AchievementGranter then AchievementGranter:noteHit() end
             state.comboCount:incrementCombo()
+            table.insert(self.parent.parent.hits, MusicTime - note.startTime)  -- the thing that keeps up with note hit times idk
             if state.comboCount:getCombo()%100 == 0 then state.comboAlert:doComboAlert(state.comboCount:getCombo()) end
         end
     end

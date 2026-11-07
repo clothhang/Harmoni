@@ -44,7 +44,7 @@ function titleScreen:enter(from, resetItems, fadeIn)
         self.selectedSong = selected.index
         self.currentSongInfo = selected.info
 
-        songSelect.currentLoopPoint = 0 -- tonumber(selected.info.songPreviewTime) or 0
+        songSelect.currentLoopPoint = 0 -- this is a hack but it works so im not changing it
         songSelect.currentAudio = love.audio.newSource(selected.path, "stream")
         songSelect.currentAudio:setVolume(1)
         songSelect.currentAudio:setLooping(true)
@@ -77,8 +77,8 @@ function titleScreen:enter(from, resetItems, fadeIn)
     }
 
 
-   -- self.moth = love.graphics.newImage("images/moth.png")
-
+   -- self.moth = love.graphics.newImage("images/moth.png")    -- the fucking moth
+ 
     self.noteImage = love.graphics.newImage("images/menu/note.png")
 
     self.buttonWidth = 350
@@ -90,7 +90,7 @@ function titleScreen:enter(from, resetItems, fadeIn)
             func = function() 
                 self:raiseWaves()
              --  State.transition("waveDissolve", States.menu.songSelect, function() print("FUCK YOU") end, 2)
-             State.transition("waveDissolve", States.menu.songSelect, nil, self.selectedSong)    -- TEMP UNTIL STATE.TRANSITION IS FIXED!!!
+             State.transition("waveDissolve", States.menu.songSelect, nil, self.selectedSong)
             end,
             color1 = {94/255,252/255,141/255,1},
             color2 = {44/255,251/255,106/255,0},

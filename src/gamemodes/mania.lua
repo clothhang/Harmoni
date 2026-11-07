@@ -7,6 +7,7 @@ function mania:new(chart, parent, fullChart, mods)
     played = false
     self.mods = mods
 
+    self.hits = {}
 
     print(fullChart.meta.difficulty)
     self.parent = parent

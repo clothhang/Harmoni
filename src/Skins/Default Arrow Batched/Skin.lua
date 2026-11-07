@@ -196,6 +196,10 @@ Skin = {   -- i need to remove lots of these tbh..
         ["Background"] = newImage("MENU/TITLEBG/1.png")
     },
 
+    Results = {
+        ["Circle Empty"] = newImage("RESULTS/empty circle.png"),
+        ["Circle Fill"] = newImage("RESULTS/fill circle.png"),
+    },
     
     RandomBackgrounds = {
         newImage("MENU/backgrounds/1.png"),

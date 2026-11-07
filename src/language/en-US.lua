@@ -70,10 +70,14 @@ Language = {
         ["NVBH"] = "They are pretty distracting sometimes"
     },
     Results = {
+        ["Stats"] = "Stats",
+        ["Judgements"] = "Judgements",
         ["Accuracy"] = "Accuracy",
         ["Score"] = "Score",
-        ["Highest Combo"] = "Highest Combo",
-        ["Performance Rating"] = "Performance Rating"
+        ["Max Combo"] = "Max Combo",
+        ["Rating"] = "Rating",
+        ["Standard Deviation"] = "Std Dev",
+        ["Mean"] = "Mean"
     },
     Mania = {
         ["Combo"] = "Combo",  -- idk ,, theres prob more we need but i cant think rn

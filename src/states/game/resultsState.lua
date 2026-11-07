@@ -1,152 +1,152 @@
 local resultsState = State("resultsState")
 
+local function standardDeviance(t)
+    local mean = 0
+
+    for i = 1, #t do
+        mean = mean + t[i]
+    end
+
+    mean = mean / #t
+
+    local variance = 0
+
+    for i = 1, #t do
+        local difference = t[i] - mean
+        variance = variance + difference * difference
+    end
+
+    variance = variance / #t
+
+    return math.sqrt(variance)
+end
+
+local function mean(t)
+    local mean = 0
+
+    for i = 1, #t do
+        mean = mean + t[i]
+    end
+
+    mean = mean / #t
+    return mean
+end
+
+
 function resultsState:enter(s, parent)
-
-   -- State.switch(States.extra.markus)
-
-    self.score = parent.scoreHandler.Scores.trueScore
-    self.heighestCombo = 459
-    self.performanceRating = parent.scoreHandler.Scores.truePerformanceRating
-    
     self.parent = parent
-    self.grades = require("modules.gamemodes.mania.maniaGrades")
-    self.accuracy = parent.scoreHandler.Scores.trueAccuracy
-    self.x, self.y = baseScreenRatio.x / 2, baseScreenRatio.y / 2
-    self.width, self.height = 700, 700
-    self.rectX, self.rectY = self.x - (self.width / 2), self.y - (self.height / 2)
-    self.arcX, self.arcY = self.x, self.y
-    self.arcR = 300
-    self.rectRC = 90
-    self.background = self.parent.background
-    self.bump = 1
-    self.hitSound = love.audio.newSource("sounds/hit.mp3", "static")     --THIS SOUND IS A PLACEHOLDER
-    self.arcLineWidth = 20
+    self.background = parent.background
 
-    self.printableAccuracy = 0
-    
 
-    self.accuracyCircleAngle = (self.printableAccuracy / 100) * 2 * math.pi
-    self:tweenArc(self.accuracyCircleAngleFinal)
-    self.lastGradeMet = nil
+    self.resultsCircle = resultsCircle(716,720,82)
+
+    self.cornerRadius = 7
+
+    self.stats = {
+        {text = LocaleHandler:getText("Results", "Stats"), value =""},
+        {text = LocaleHandler:getText("Results", "Accuracy"), value = string.format("%.2f%%",self.parent.scoreHandler.Scores.trueAccuracy)},
+        {text = LocaleHandler:getText("Results", "Max Combo"), value = ":3"},
+        {text = LocaleHandler:getText("Results", "Score"), value = string.format("%.0f", self.parent.scoreHandler.Scores.trueScore)},
+        {text = LocaleHandler:getText("Results", "Rating"), value = string.format("%.2f",self.parent.scoreHandler.Scores.truePerformanceRating)},
+        {text = LocaleHandler:getText("Results", "Standard Deviation"), value = string.format("%.2f",standardDeviance(self.parent.hits)).." ms"},
+        {text = LocaleHandler:getText("Results", "Mean"), value = string.format("%.2f",mean(self.parent.hits)).." ms"}
+    }
+
+    self.judge = {
+        {text = LocaleHandler:getText("Results", "Judgements")},
+        {text = self.parent.judgementCount.judgements[1].name, value = self.parent.judgementCount.judgements[1].count},
+        {text = self.parent.judgementCount.judgements[2].name, value = self.parent.judgementCount.judgements[2].count},
+        {text = self.parent.judgementCount.judgements[3].name, value = self.parent.judgementCount.judgements[3].count},
+        {text = self.parent.judgementCount.judgements[4].name, value = self.parent.judgementCount.judgements[4].count},
+        {text = self.parent.judgementCount.judgements[5].name, value = self.parent.judgementCount.judgements[5].count},
+        {text = self.parent.judgementCount.judgements[6].name, value = self.parent.judgementCount.judgements[6].count},
+    }
 end
 
 function resultsState:update(dt)
-    self.rectX, self.rectY = self.x - (self.width / 2), self.y - (self.height / 2)
-    self.accuracyCircleAngle = (self.printableAccuracy / 100) * 2 * math.pi
-
-    for i, Grade in ipairs (self.grades) do
-        if Grade.accuracy <= self.printableAccuracy and not Grade.hit then
-            Grade.hit = true
-            self:onGradeReached(Grade.grade)
-        end
-    end
-
-
-    if Input:pressed("menuConfirm") then State.switch(States.menu.songSelect) end
-end
-
-function resultsState:onGradeReached(grade)
-    self.bump = 1.05
-    if self.bumpTimer then Timer.cancel(self.bumpTimer) end
-    self.bumpTimer = Timer.tween(0.25, self, {bump = 1}, "out-quad")
-    self.printableGrade = grade
-   -- local hitClone = self.hitSound:clone()
-    --hitClone:setPitch(self.printableAccuracy / 100)
-    --hitClone:play()
-
-    print(grade)
-end
-
-function resultsState:tweenArc(amount)
-    Timer.tween(1, self, {printableAccuracy = self.accuracy}, "out-quad", function()
-    self:expandRectangle()
-        self.printableAccuracy = self.accuracy -- we do this because the fucking tween doesnt get it the whole way for some reason
-                                               -- nah it makes sense because floating point precision is lowkey doo-doo butt
-    end)
-end
-
-function resultsState:moveArcUp(amount)
-    Timer.tween(0.3,self, {arcY = self.arcY-amount}, "out-circ")
-end
-
-function resultsState:expandRectangle()
-    local newHeight = 1112
-    local difference = newHeight - self.height
-        self:moveArcUp(difference/2)
-
-    Timer.tween(0.3,self,{height = newHeight}, "out-circ")
 end
 
 function resultsState:draw()
-
     self.background:draw()
-    love.graphics.push()
-        love.graphics.translate(self.x, self.y)
-        love.graphics.scale(self.bump or 1, self.bump or 1)
-        love.graphics.translate(-self.x, -self.y)
-
-        love.graphics.setColor(0, 0, 0, 0.9)
-        love.graphics.rectangle("fill", self.rectX, self.rectY, self.width, self.height, self.rectRC, self.rectRC)
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.setLineWidth(self.arcLineWidth)
-
-        local function stencilFunc()
-            love.graphics.circle("fill", self.arcX, self.arcY, self.arcR - 10)
-        end
-
-        love.graphics.stencil(stencilFunc, "replace", 1)
-        love.graphics.setStencilTest("less", 1)
-
-        love.graphics.arc("line", self.arcX, self.arcY, self.arcR, -math.pi/2, -math.pi/2 + self.accuracyCircleAngle)
-        love.graphics.setStencilTest()
-
-        love.graphics.setFont(SkinHandler:getFont("Menu", 400))
-        love.graphics.printf(self.printableGrade or "F", self.arcX-self.arcR, self.arcY-love.graphics.getFont():getHeight()/2, self.arcR*2, "center")
-    love.graphics.pop()
-
-        self:drawSmallRectangles()
-    self:debugDraw()
-end
 
 
-function resultsState:drawSmallRectangles()
-    local function stencilFunc()
-        love.graphics.rectangle("fill", self.rectX, self.rectY, self.width, self.height, self.rectRC, self.rectRC)
+
+
+    --table stuff
+    local font = SkinHandler:getFont("Menu", 45)
+    love.graphics.setFont(font)
+    local currentLineWidth = love.graphics.getLineWidth()
+    local thickLine = 8
+    local tec = 7 -- 7 cuz 6 judgements plus the label at the top
+    local tx,ty,tw,th = 1431, 308, 824, 824
+    local tc = tw/2+tx
+    local teh = th/tec
+
+    local leftSide
+    local rightSide
+
+    local function drawTableLine(y, width)
+        local x1,x2 = tx, tx+tw
+        love.graphics.setLineWidth(width)
+        love.graphics.line(x1,y,x2,y)
+        love.graphics.setLineWidth(currentLineWidth)
     end
 
-    love.graphics.stencil(stencilFunc, "replace", 1)
-    love.graphics.setStencilTest("greater", 0)
+    local function setupTablePositionsThingsIdk()
+        leftSide = {}
+        rightSide = {}
+        for i = 1,tec do
+            table.insert(leftSide, {x = tx, y = ty+((i)*teh), w = tw/2, h = teh})
+            table.insert(rightSide, {x = tx+tw/2, y = ty+((i)*teh), w = tw/2, h = teh})
+        end
+    end
 
-    local smallRectHeights = 130
-    local smallRectSpacing = 20
-   
-    local cornerRadius = 70 
-
-
-    love.graphics.setColor(1,1,1,1)
-    love.graphics.setFont(SkinHandler:getFont("Menu", 50))
-    love.graphics.printf(LocaleHandler:getText("Results", "Score") .. ": " .. self.score,self.rectX+10,(self.arcY+self.arcR+(self.arcLineWidth/2)+smallRectSpacing)+love.graphics.getFont():getHeight()/2,self.width-20,"center")
+    setupTablePositionsThingsIdk()
 
 
+    love.graphics.setLineWidth(thickLine)
+    love.graphics.rectangle("line", tx, ty, tw, th, self.cornerRadius, self.cornerRadius)
+    love.graphics.setColor(0,0,0,0.7)
+    love.graphics.rectangle("fill", tx, ty, tw, th, self.cornerRadius, self.cornerRadius)
     love.graphics.setColor(1,1,1)
+    love.graphics.line(tc,ty,tc,ty+th)
+    love.graphics.setLineWidth(currentLineWidth)
+    for i = 1,tec do
+        local y = ty+((i-1)*teh)
+        if i >1 then drawTableLine(y, i == 2 and thickLine or currentLineWidth) end
+    end
 
-    -- accuracy 
-    love.graphics.printf(LocaleHandler:getText("Results", "Accuracy") .. ": " .. self.accuracy .. "%",self.rectX+10,(self.arcY+self.arcR+(self.arcLineWidth/2)+smallRectSpacing*2)+(smallRectHeights+love.graphics.getFont():getHeight()/2),self.width-20,"center")
-    love.graphics.setColor(1,1,1)
+    for i = 1,#self.stats do
+        local text
+        print(i)
+        if i == 1 then
+            text = self.stats[i].text
+        else
+            text = self.stats[i].text .. ": " .. self.stats[i].value
+        end
+        love.graphics.printf(text, leftSide[i].x, leftSide[i].y-(teh/2)-(font:getHeight()/2), leftSide[i].w, "center")
+    end
+
+    for i = 1,#self.judge do
+        local text
+        print(i)
+        if i == 1 then
+            text = self.judge[i].text
+        else
+            text = self.judge[i].text .. ": " .. self.judge[i].value
+        end
+        love.graphics.printf(text, rightSide[i].x, leftSide[i].y-(teh/2)-(font:getHeight()/2), rightSide[i].w, "center")
+    end
 
 
-    -- pr 
-    love.graphics.printf(LocaleHandler:getText("Results", "Performance Rating") .. ": " .. self.performanceRating,self.rectX+10,(self.arcY+self.arcR+(self.arcLineWidth/2)+smallRectSpacing*3)+(smallRectHeights*2+love.graphics.getFont():getHeight()/2),self.width-20,"center")
-    love.graphics.setColor(1,1,1)
-    love.graphics.setStencilTest()
-end
 
-function resultsState:debugDraw()
-    love.graphics.setFont(SkinHandler:getFont("Menu", 50))
-    love.graphics.print("DEBUG SHIT    :3\n" .. 
-                        "Accuracy: " .. self.accuracy .. "\n" .. 
-                        "printableAccuracy: " .. self.printableAccuracy,
-                        10, 10)
+
+
+
+
+    -- circle
+
+    self.resultsCircle:draw()
 end
 
 return resultsState

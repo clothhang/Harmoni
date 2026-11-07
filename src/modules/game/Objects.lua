@@ -38,6 +38,9 @@
     lyricsRenderer = require("objects.menu.lyricsRenderer") -- haha it says ass
     jukeboxSongButton = require("objects.menu.jukeboxSongButton")
 
+    --results
+    resultsCircle = require("objects.results.resultsCircle")
+
     --UI
     UIsquiglyLine = require("objects.UI.UIsquiglyLine")  -- UIslop
     cursor = require("objects.UI.cursor")
@@ -60,7 +63,6 @@
     growingCircleObjectThingyIdfk = require("objects.UI.growingCircleObjectThingyIdfk")  -- this one is the most slop of all the UIslop i swear to god, i literally am stealing this from a vocaloid music video i saw,, and its my first time using bezier curves so im prob doing everuthing wrong
     growingSquare = require("objects.UI.growingAwesomeFuckingSQAURE!!!")
     UItrail = require("objects.UI.trail")  -- CRAZY UIslop
-
     settingsbaseshitthingy = require("objects.settings.settingsbaseshitthingy")
     settingsTabButton = require("objects.settings.tabButton")
     settingsModeSeperator = require("objects.settings.modeSeperator")

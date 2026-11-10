@@ -55,7 +55,7 @@ function maniaHUD:draw()
     love.graphics.printf(scoreText .. "\n" .. ipsOverNpsText, 10, 10, baseScreenRatio.x, "left")
 
     -- righjt
-    love.graphics.printf(prText .. "\n" .. accuracyText .. "\n" .. self.grade, baseScreenRatio.x - 1000, 10, 990, "right")
+    love.graphics.printf(prText .. "\n" .. accuracyText .. "\n" .. (self.grade.grade or "N/A"), baseScreenRatio.x - 1000, 10, 990, "right")
 
    -- love.graphics.printf
 end

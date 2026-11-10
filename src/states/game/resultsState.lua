@@ -34,6 +34,9 @@ end
 
 
 function resultsState:enter(s, parent)
+
+
+    love.audio.stop()
     self.parent = parent
     self.background = parent.background
 

@@ -6,7 +6,7 @@ end
 
 function resultsCircle:setupSparkles()    -- thank you hot particles ur the goat 
                                             --https://love2d.org/forums/viewtopic.php?t=88860
-    local image1 = love.graphics.newImage("Images/particles/star.png")
+    local image1 = love.graphics.newImage("images/particles/star.png")
     image1:setFilter("linear", "linear")
 
     local ps = love.graphics.newParticleSystem(image1, 15)
@@ -35,7 +35,7 @@ function resultsCircle:setupSparkles()    -- thank you hot particles ur the goat
 end
 
 function resultsCircle:setupLeftConfetti()
-    local image1 = love.graphics.newImage("Images/particles/light.png")
+    local image1 = love.graphics.newImage("images/particles/light.png")
     image1:setFilter("linear", "linear")
 
     local ps = love.graphics.newParticleSystem(image1, 48)
@@ -60,7 +60,7 @@ function resultsCircle:setupLeftConfetti()
     ps:setSpread(0.53855872154236)
     ps:setTangentialAcceleration(0, 0)
 
-
+    return ps -- oh my god bruh.
 end
 
 

@@ -268,7 +268,7 @@ function titleScreen:enter(from, resetItems, fadeIn)
             self:setUpThoseSqauresThatIHate()
 
     self.thoseWeirdGrowingCirclesThatIHate = growingCircleObjectThingyIdfk()
-    self.UItrail = UItrail({{x = 0, y = 836}, {x = 582, y = 326}, {x = 297, y = 0}, {x = 297, y = -100}, {x = 1893, y = -100}, {x = 1893, y = 0}, {x = 1749, y = 413}, {x = 2559, y = 696}, {x = 2659, y = 696}, {x = 2659, y = 1101}, {x = 2559, y =1101}, {x = 2273,  y = 813}, {x = 1643, y = 1439}, {x = 1643, y = 1539}, {x = -100, y = 1540}, {x = -100, y = 836}}, 1000, 2, function() print("hi") end, false, 5)
+    self.UItrail = UItrail({{x = 0, y = 836}, {x = 582, y = 326}, {x = 297, y = 0}, {x = 297, y = -100}, {x = 1893, y = -100}, {x = 1893, y = 0}, {x = 1749, y = 413}, {x = 2559, y = 696}, {x = 2659, y = 696}, {x = 2659, y = 1101}, {x = 2559, y =1101}, {x = 2273,  y = 813}, {x = 1643, y = 1439}, {x = 1643, y = 1539}, {x = -100, y = 1540}, {x = -100, y = 836}}, 1000, 2, function() end, false, 5)
 
 
     if self.coverAlpha > 0 then
@@ -389,13 +389,11 @@ function titleScreen:setUpThoseSqauresThatIHate()
     -- decide how long till the first one appearrs
     local delay = love.math.random(5,5)
     local colors = SkinHandler:getRandomColors()
-    print("SQUARE!!! SQAURREE!!!!!!", delay)
 
     -- set da timer 
     Timer.after(delay, function()
 
         local x,y,size,color = love.math.random(0,baseScreenRatio.x), love.math.random(0,baseScreenRatio.y), love.math.random(100,500),colors[love.math.random(1,#colors)]
-                    print("SQUARE!!! SQAURREE!!!!!!", x,y,size,color)
 
         self.awesomeSquare =  growingSquare(x,y,size,color)
         self:setUpThoseSqauresThatIHate()

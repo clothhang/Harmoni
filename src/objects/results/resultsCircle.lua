@@ -10,7 +10,7 @@ function resultsCircle:setupSparkles()    -- thank you hot particles ur the goat
     image1:setFilter("linear", "linear")
 
     local ps = love.graphics.newParticleSystem(image1, 15)
-    ps:setColors(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0.5, 1, 1, 1, 0)
+    ps:setColors(1, 0.890625, 0, 0, 0, 1, 0.859375, 1, 0.5234375, 0, 1, 1, 1, 0, 0.984375, 1)
     ps:setDirection(-1.5707963705063)
     ps:setEmissionArea("ellipse", 400, 400, 0, false)
     ps:setEmissionRate(18.494899749756)
@@ -41,8 +41,8 @@ function resultsCircle:setupLeftConfetti()
     local ps = love.graphics.newParticleSystem(image1, 48)
     ps:setColors(1, 0.890625, 0, 0, 0, 1, 0.859375, 1, 0.5234375, 0, 1, 1, 1, 0, 0.984375, 1)
     ps:setDirection(-1.0516501665115)
-    ps:setEmissionArea("uniform", 0, 59.281661987305, 0, false)
-    ps:setEmissionRate(80.357177734375)
+    ps:setEmissionArea("uniform", 0, baseScreenRatio.y, 0, false)
+    ps:setEmissionRate(200.357177734375)
     ps:setEmitterLifetime(0.56413877010345)
     ps:setInsertMode("top")
     ps:setLinearAcceleration(0.45932897925377, 520.62384033203, 0.051036551594734, 541.44677734375)
@@ -60,20 +60,55 @@ function resultsCircle:setupLeftConfetti()
     ps:setSpread(0.53855872154236)
     ps:setTangentialAcceleration(0, 0)
 
-    return ps -- oh my god bruh.
+    return ps
 end
+
+
+function resultsCircle:setupRightConfetti()
+    local image1 = love.graphics.newImage("images/particles/light.png")
+    image1:setFilter("linear", "linear")
+
+    local ps = love.graphics.newParticleSystem(image1, 48)
+    ps:setColors(1, 0.890625, 0, 0, 0, 1, 0.859375, 1, 0.5234375, 0, 1, 1, 1, 0, 0.984375, 1)
+    ps:setDirection(-2.0933437347412)
+    ps:setEmissionArea("uniform", 0, baseScreenRatio.y, 0, false)
+    ps:setEmissionRate(200.357177734375)
+    ps:setEmitterLifetime(0.56413877010345)
+    ps:setInsertMode("top")
+ps:setLinearAcceleration(0.45932897925377, 520.62384033203, 0.051036551594734, 541.44677734375)
+    ps:setLinearDamping(0.31050637364388, 0.31050637364388)
+    ps:setOffset(75, 75)
+    ps:setParticleLifetime(4.0770449638367, 4.1288161277771)
+    ps:setRadialAcceleration(0, 0)
+    ps:setRelativeRotation(false)
+    ps:setRotation(-3.1415927410126, 0)
+    ps:setSizes(0.76988649368286, 0.53716236352921)
+    ps:setSizeVariation(0.76677316427231)
+    ps:setSpeed(729.23065185547, 744.74578857422)
+    ps:setSpin(1.6669819355011, -2.303195476532)
+    ps:setSpinVariation(0.65814697742462)
+    ps:setSpread(0.53855872154236)
+    ps:setTangentialAcceleration(0, 0)
+
+    return ps
+end
+
+
+
 
 
 
 function resultsCircle:new(x,y,percent,callback,delay)
     self.sparkles = self:setupSparkles()
     self.leftConfetti = self:setupLeftConfetti()
+    self.rightConfetti = self:setupRightConfetti()
     self.emptyImage = SkinHandler:getImage("Results", "Circle Empty")
     self.fillImage = SkinHandler:getImage("Results", "Circle Fill")
 
     self.callback = callback or function() end
     self.delay = delay or 0
     self.scoreTickSound = love.audio.newSource("sounds/scoreTick.ogg", "static")
+
 
     self.x, self.y = x,y
 
@@ -86,13 +121,18 @@ function resultsCircle:new(x,y,percent,callback,delay)
     self.printablePercentLiquidAssValue = 0
     self.tween = Timer.tween(3, self, {printablePercent = self.percent}, "in-out-quint", 
     function() 
-        self.printablePercent = self.percent 
+        self.printablePercent = self.percent
         self.doingTween = false 
         Timer.after(1, function()
             self:presentGrade()
         end)
     end)
 
+    
+
+    if self.percent >= 90 then self.sparkle = true end
+    if self.percent >= 95 then self.confetti = true end
+    
     self.soundEffectsHitTable = {}
     self.font = SkinHandler:getFont("Menu", 230)
     for i = 1,50 do
@@ -119,15 +159,21 @@ function resultsCircle:update(dt)
         self:printablePercentLiquidAss()
     end
 
-    self.sparkles:update(dt)
+    if self.gradePresented then
+        if self.sparkle then self.sparkles:update(dt) end
+        if self.confetti then
+            self.leftConfetti:update(dt)
+            self.rightConfetti:update(dt)
+        end
+    end
     if self.colorTween then Timer.cancel(self.colorTween) end
 
     self.colorTween = Timer.tween(0.15, self.fillColor, {[1] = self.targetColor[1], [2] = self.targetColor[2], [3] = self.targetColor[3]})
 end
 
 function resultsCircle:printablePercentLiquidAss(big)
-    self.printablePercentLiquidAssValue = (big and 0.3) or 0.1
-    self.printablePercentLiquidAssTween = Timer.tween(1, self, {printablePercentLiquidAssValue = 0},  "out-elastic")
+    self.printablePercentLiquidAssValue = (big and 2) or 0.1
+    self.printablePercentLiquidAssTween = Timer.tween(1, self, {printablePercentLiquidAssValue = (big and 1) or 0},  "out-elastic")
 end
 
 
@@ -156,7 +202,7 @@ function resultsCircle:draw()
         love.graphics.scale(-1, 1)
         love.graphics.translate(-baseScreenRatio.x/2, -baseScreenRatio.y/2)
 
-        love.graphics.arc("fill", "pie", self.x + baseScreenRatio.x/2 - 155, self.y, 372, math.rad(arc2val), math.rad(-217))
+        love.graphics.arc("fill", "pie", self.x, self.y, 372, math.rad(arc2val), math.rad(-217))
         love.graphics.pop()
     end, "replace", 1)
 
@@ -173,11 +219,15 @@ function resultsCircle:draw()
     love.graphics.draw(self.sparkles, self.x, self.y-100)
 
 
-    love.graphics.draw(self.leftConfetti, 0, baseScreenRatio.y-500)
+    love.graphics.draw(self.leftConfetti, 0, baseScreenRatio.y)
+    love.graphics.draw(self.rightConfetti, baseScreenRatio.x, baseScreenRatio.y)
+
+    love.graphics.setBlendMode("alpha")
 
 
 end
- 
+
+
 return resultsCircle
 
 

@@ -49,7 +49,7 @@ struct MetaBall {
 };
 
 vec3 renderMetaBall(vec2 uv) {
-    number totalAlpha = 0.0;
+    number totalAlpha = 0.0
     vec3 rgbTotal = vec3(0.0);
     vec3 col = vec3(0.0);
     number strongestField = 0.0;

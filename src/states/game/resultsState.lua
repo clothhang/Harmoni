@@ -38,10 +38,15 @@ function resultsState:enter(s, parent)
 
     love.audio.stop()
     self.parent = parent
-    self.background = parent.background
+    self.background = parent.background or sharedBackground("Images/burgerr.jpg", 0.5, 1)
+    self.upperBackground = (self.parent.background and self.parent.background.image) or love.graphics.newImage("Images/burgerr.jpg")
+
+    self.upperBackgroundCanvas = love.graphics.newCanvas(baseScreenRatio.x, baseScreenRatio.y)
+    self.upperBackgroundAlpha = 1
 
 
-    self.resultsCircle = resultsCircle(716,720,100)
+  --  self.resultsCircle = resultsCircle(716,720,100)
+    self.resultsCircle = resultsCircle(baseScreenRatio.x/2,720,self.parent.scoreHandler.Scores.trueAccuracy or 100, function() self:theThingAfterTheCircleIDK() end, 1)
 
     self.cornerRadius = 7
 
@@ -66,8 +71,19 @@ function resultsState:enter(s, parent)
     }
 end
 
+
+function resultsState:theThingAfterTheCircleIDK()
+    Timer.tween(0.15, self.resultsCircle, {x = 716}, "out-expo", function() 
+        Timer.after(0.2, function()
+            print(type(upperBackgroundAlpha))
+            Timer.tween(0.15, self, {upperBackgroundAlpha = 0})
+        end)
+    end)
+end
+
 function resultsState:update(dt)
     self.resultsCircle:update(dt)
+    self.background:update(dt)
 end
 
 function resultsState:draw()
@@ -143,8 +159,24 @@ function resultsState:draw()
 
 
 
+    -- upper background (covers the table and shit so i can fake those fading in)
+    local prevCanvas = love.graphics.getCanvas()
+    love.graphics.setCanvas({self.upperBackgroundCanvas,stencil = true})
+        love.graphics.draw(
+            self.upperBackground,
+            0, 0,
+            nil,
+            baseScreenRatio.x/self.upperBackground:getWidth(),
+            baseScreenRatio.y/self.upperBackground:getHeight()
+        )
+        love.graphics.setColor(0,0,0,(gameplayBackgroundDim or 0.5))
+        love.graphics.rectangle("fill",0,0,baseScreenRatio.x,baseScreenRatio.y)
 
+    love.graphics.setCanvas({prevCanvas, stencil = true})
+    love.graphics.setColor(1,1,1,self.upperBackgroundAlpha)
+    love.graphics.draw(self.upperBackgroundCanvas)
 
+    love.graphics.setColor(1,1,1)
 
     -- circle
 

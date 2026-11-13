@@ -105,6 +105,8 @@ function resultsCircle:new(x,y,percent,callback,delay)
     self.emptyImage = SkinHandler:getImage("Results", "Circle Empty")
     self.fillImage = SkinHandler:getImage("Results", "Circle Fill")
 
+    self.strongApplause = love.audio.newSource("sounds/results/strong applause.mp3", "static")
+    self.weakApplause = love.audio.newSource("sounds/results/weak applause.mp3", "static")
     self.callback = callback or function() end
     self.delay = delay or 0
     self.scoreTickSound = love.audio.newSource("sounds/scoreTick.ogg", "static")
@@ -130,7 +132,7 @@ function resultsCircle:new(x,y,percent,callback,delay)
 
     
 
-    if self.percent >= 90 then self.sparkle = true end
+    if self.percent >= 90 then self.sparkle = true; self.useStrongApplauseSound = true end
     if self.percent >= 95 then self.confetti = true end
     
     self.soundEffectsHitTable = {}
@@ -145,6 +147,7 @@ function resultsCircle:presentGrade()
     self.gradePresented = true
     self:printablePercentLiquidAss(true)
     Timer.after(self.delay, function() self.callback() end)
+    if self.useStrongApplauseSound then self.strongApplause:play() else self.weakApplause:play() end
 end
 
 function resultsCircle:update(dt)
@@ -202,14 +205,15 @@ function resultsCircle:draw()
         love.graphics.scale(-1, 1)
         love.graphics.translate(-baseScreenRatio.x/2, -baseScreenRatio.y/2)
 
-        love.graphics.arc("fill", "pie", self.x, self.y, 372, math.rad(arc2val), math.rad(-217))
+        love.graphics.arc("fill", "pie", -self.x+baseScreenRatio.x, self.y, 372, math.rad(arc2val), math.rad(-217))
         love.graphics.pop()
     end, "replace", 1)
 
     love.graphics.setStencilTest("notequal", 1)
     love.graphics.setColor(self.fillColor)
     love.graphics.draw(self.fillImage, self.x, self.y, nil, 1, 1, self.emptyImage:getWidth()/2, self.emptyImage:getHeight()/2)
-   --     love.graphics.rectangle("fill", 0, 0, 2560, 1440)
+   
+   -- love.graphics.rectangle("fill", 0, 0, 2560, 1440)
 
     love.graphics.setColor(1,1,1)
     love.graphics.setStencilTest()

@@ -151,6 +151,7 @@ function maniaLane:handleInput()
 
             if AchievementGranter then AchievementGranter:noteHit() end
             state.comboCount:incrementCombo()
+            if bestJudgement.name == ("Perfect" or "Great") then self.receptor:emitParticles(); print(bestJudgement.name) end
             table.insert(self.parent.parent.hits, MusicTime - note.startTime)  -- the thing that keeps up with note hit times idk
             if state.comboCount:getCombo()%100 == 0 then state.comboAlert:doComboAlert(state.comboCount:getCombo()) end
         end

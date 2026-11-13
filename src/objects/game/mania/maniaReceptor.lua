@@ -6,6 +6,45 @@ local laneStrings = {
     [7] = {"Left1", "Down", "Left2", "Center", "Right1", "Up", "Right2"}
 }
 
+
+function maniaReceptor:setUpParticles()
+    local image1 = love.graphics.newImage("images/particles/ring.png")
+    image1:setFilter("linear", "linear")
+
+    local ps = love.graphics.newParticleSystem(image1, 11)
+    ps:setColors(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0.5, 1, 1, 1, 0)
+    ps:setDirection(-1.5707963705063)
+    ps:setEmissionArea("none", 0, 0, 0, false)
+    ps:setEmissionRate(9.3964834213257)
+    ps:setEmitterLifetime(3.3002142906189)
+    ps:setInsertMode("top")
+    ps:setLinearAcceleration(0.70335298776627, 2560.2829589844, 0.07815033197403, 2674.6950683594)
+    ps:setLinearDamping(3.9054217338562, 1.7996692657471)
+    ps:setOffset(50, 50)
+    ps:setParticleLifetime(0.52058964967728, 0.50248354673386)
+    ps:setRadialAcceleration(0.15630066394806, 0)
+    ps:setRelativeRotation(false)
+    ps:setRotation(0, 0)
+    ps:setSizes(0.55895233154297)
+    ps:setSizeVariation(0)
+    ps:setSpeed(896.80401611328, 834.97448730469)
+    ps:setSpin(0, 0)
+    ps:setSpinVariation(0)
+    ps:setSpread(3.0219130516052)
+    ps:setTangentialAcceleration(0, 0)
+
+    return ps
+end
+
+
+
+
+function maniaReceptor:emitParticles()
+   -- self.particle:start()
+   -- self.particle:emit(2)
+   -- self.particle:stop()
+end
+
 function maniaReceptor:new(mode, lane, inputBind, x, y, parent)
     self.parent = parent
     self.lane = lane
@@ -24,6 +63,8 @@ function maniaReceptor:new(mode, lane, inputBind, x, y, parent)
     self.imageDown = SkinHandler:getImage("Receptors", "Down", self.laneCountString, self.laneString)
 
     vertSprite.new(self, self.x, self.y, 0)
+
+    self.particle = self:setUpParticles()
 end
 
 function maniaReceptor:getLaneString()
@@ -38,6 +79,7 @@ end
 
 function maniaReceptor:update(dt)
     self.held = Input:down(self.inputBind)
+  --  self.particle:update(dt)
 end
 
 function maniaReceptor:draw()
@@ -75,6 +117,8 @@ function maniaReceptor:draw()
         q = drawnImage
     end
     vertSprite.draw(self, q)
+
+    love.graphics.draw(self.particle, self.x, self.y)
 
     -- draw a line at the center position
 

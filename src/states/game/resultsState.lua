@@ -36,7 +36,6 @@ end
 function resultsState:enter(s, parent)
 
 
-    love.audio.stop()
     self.parent = parent
     self.background = parent.background or sharedBackground("Images/burgerr.jpg", 0.5, 1)
     self.upperBackground = (self.parent.background and self.parent.background.image) or love.graphics.newImage("Images/burgerr.jpg")
@@ -69,6 +68,9 @@ function resultsState:enter(s, parent)
         {text = self.parent.judgementCount.judgements[5].name, value = self.parent.judgementCount.judgements[5].count},
         {text = self.parent.judgementCount.judgements[6].name, value = self.parent.judgementCount.judgements[6].count},
     }
+
+    self.introSound = love.audio.newSource("sounds/results/glass_005.ogg", "static")
+    self.introSound:play()
 end
 
 
@@ -84,6 +86,10 @@ end
 function resultsState:update(dt)
     self.resultsCircle:update(dt)
     self.background:update(dt)
+
+    if Input:pressed("menuConfirm") then
+        State.transition("waveDissolve", States.menu.songSelect, nil, selectedSong)
+    end
 end
 
 function resultsState:draw()

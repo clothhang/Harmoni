@@ -122,15 +122,28 @@ function resultsCircle:new(x,y,percent,callback,delay)
 
     self.printablePercentLiquidAssValue = 0
     self.tween = Timer.tween(3, self, {printablePercent = self.percent}, "in-out-quint", 
-    function() 
-        self.printablePercent = self.percent
-        self.doingTween = false 
-        Timer.after(1, function()
-            self:presentGrade()
-        end)
-    end)
+        function()
+            self.printablePercent = self.percent
+            self.doingTween = false
 
-    
+            if self.grade.grade == "X" then
+                self.goldFade = 0
+                self.goldFadeStarted = true
+
+                self.goldFadeTween = Timer.tween(1.2, self, {goldFade = 1}, "out-quad")
+            end
+
+            Timer.after(1, function()
+                self:presentGrade()
+            end)
+        end
+    )
+
+    self.goldShader = love.graphics.newShader("shaders/gold.glsl")
+    self.goldShader:send("iResolution", {baseScreenRatio.x, baseScreenRatio.y, 0})
+    self.goldFade = 0
+    self.goldTime = 0
+    self.goldFadeStarted = false
 
     if self.percent >= 90 then self.sparkle = true; self.useStrongApplauseSound = true end
     if self.percent >= 95 then self.confetti = true end
@@ -146,32 +159,57 @@ end
 function resultsCircle:presentGrade()
     self.gradePresented = true
     self:printablePercentLiquidAss(true)
-    Timer.after(self.delay, function() self.callback() end)
-    if self.useStrongApplauseSound then self.strongApplause:play() else self.weakApplause:play() end
+
+    if self.grade.grade == "X" then
+        self.goldFade = 0
+        self.goldFadeTween = Timer.tween(1.2, self, {goldFade = 1}, "out-quad")
+    end
+
+    Timer.after(self.delay, function()
+        self.callback()
+    end)
+
+    if self.useStrongApplauseSound then
+        self.strongApplause:play()
+    else
+        self.weakApplause:play()
+    end
 end
 
 function resultsCircle:update(dt)
+    if self.goldFadeStarted then
+        self.goldTime = self.goldTime + dt
+    end
+
     self.targetColor = maniaGrades.getGrade(self.printablePercent).color
-    if math.floor(self.printablePercent)%2 == 0 and not self.soundEffectsHitTable[(math.floor(self.printablePercent))/2] then
-        self.soundEffectsHitTable[(math.floor(self.printablePercent))/2] = true
+
+    if math.floor(self.printablePercent) % 2 == 0 and not self.soundEffectsHitTable[math.floor(self.printablePercent) / 2] then
+
+        self.soundEffectsHitTable[math.floor(self.printablePercent) / 2] = true
+
         local clone = self.scoreTickSound:clone()
         local pitch = remap(self.printablePercent, 0, 100, 0.7, 1)
+
         clone:setPitch(pitch)
         clone:play()
-        print("click")
+
         self:printablePercentLiquidAss()
     end
 
     if self.gradePresented then
         if self.sparkle then self.sparkles:update(dt) end
+
         if self.confetti then
             self.leftConfetti:update(dt)
             self.rightConfetti:update(dt)
         end
     end
-    if self.colorTween then Timer.cancel(self.colorTween) end
 
-    self.colorTween = Timer.tween(0.15, self.fillColor, {[1] = self.targetColor[1], [2] = self.targetColor[2], [3] = self.targetColor[3]})
+    if not self.goldFadeStarted then
+        if self.colorTween then Timer.cancel(self.colorTween) end
+
+        self.colorTween = Timer.tween(0.15, self.fillColor, {[1] = self.targetColor[1], [2] = self.targetColor[2], [3] = self.targetColor[3]})
+    end
 end
 
 function resultsCircle:printablePercentLiquidAss(big)
@@ -179,9 +217,8 @@ function resultsCircle:printablePercentLiquidAss(big)
     self.printablePercentLiquidAssTween = Timer.tween(1, self, {printablePercentLiquidAssValue = (big and 1) or 0},  "out-elastic")
 end
 
-
 function resultsCircle:draw()
-    if self.debug then 
+    if self.debug then
         for i = 1,#self.soundEffectsHitTable do
             love.graphics.print(tostring(self.soundEffectsHitTable[i]), 30, 20*i)
         end
@@ -191,15 +228,10 @@ function resultsCircle:draw()
 
     local printableThing = (self.gradePresented and self.grade.grade) or math.floor(self.printablePercent) .. "%"
     love.graphics.printf(printableThing, self.x-self.emptyImage:getWidth()*(1+self.printablePercentLiquidAssValue)/2, self.y-love.graphics.getFont():getHeight()*(1+self.printablePercentLiquidAssValue)/2, self.emptyImage:getWidth(), "center", nil, 1+self.printablePercentLiquidAssValue, 1+self.printablePercentLiquidAssValue)
- --   love.graphics.setFont(defaultFont)
-
-
 
     local arc2val = remap(self.printablePercent, 0, 100, 37, -217)
-    --print(arc2val)
-
     -- min is 37, max is -217
-    love.graphics.stencil(function() 
+    love.graphics.stencil(function()
         love.graphics.push()
         love.graphics.translate(baseScreenRatio.x/2, baseScreenRatio.y/2)
         love.graphics.scale(-1, 1)
@@ -210,25 +242,32 @@ function resultsCircle:draw()
     end, "replace", 1)
 
     love.graphics.setStencilTest("notequal", 1)
-    love.graphics.setColor(self.fillColor)
-    love.graphics.draw(self.fillImage, self.x, self.y, nil, 1, 1, self.emptyImage:getWidth()/2, self.emptyImage:getHeight()/2)
-   
-   -- love.graphics.rectangle("fill", 0, 0, 2560, 1440)
 
-    love.graphics.setColor(1,1,1)
+    local isGoldRank = self.goldFadeStarted
+
+    if isGoldRank then
+        self.goldShader:send("fade", self.goldFade)
+        self.goldShader:send("iTime", self.goldTime)
+        love.graphics.setShader(self.goldShader)
+        love.graphics.setColor(1, 1, 1, 1)
+    else
+        love.graphics.setColor(self.fillColor)
+    end
+
+    love.graphics.draw(self.fillImage, self.x, self.y, nil, 1, 1, self.emptyImage:getWidth()/2, self.emptyImage:getHeight()/2)
+
+    love.graphics.setShader()
+    love.graphics.setColor(1, 1, 1, 1)
     love.graphics.setStencilTest()
-        love.graphics.draw(self.emptyImage, self.x, self.y, nil, 1, 1, self.emptyImage:getWidth()/2, self.emptyImage:getHeight()/2)
+
+    love.graphics.draw(self.emptyImage, self.x, self.y, nil, 1, 1, self.emptyImage:getWidth()/2, self.emptyImage:getHeight()/2)
 
     love.graphics.setBlendMode("add")
     love.graphics.draw(self.sparkles, self.x, self.y-100)
-
-
     love.graphics.draw(self.leftConfetti, 0, baseScreenRatio.y)
     love.graphics.draw(self.rightConfetti, baseScreenRatio.x, baseScreenRatio.y)
 
     love.graphics.setBlendMode("alpha")
-
-
 end
 
 

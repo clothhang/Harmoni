@@ -2,6 +2,68 @@ local mania = Class:extend("mania")
 local videoFade = 0
 local played = false
 
+function mania:setupLeftConfetti()
+    local image1 = love.graphics.newImage("images/particles/star.png")
+    image1:setFilter("linear", "linear")
+
+    local ps = love.graphics.newParticleSystem(image1, 389)
+    ps:setColors(1, 0.890625, 0, 0, 0, 1, 0.859375, 1, 0.5234375, 0, 1, 1, 1, 0, 0.984375, 1)
+    ps:setDirection(-0.9549263715744)
+    ps:setEmissionArea("uniform", 0, 1000, 0, false)
+    ps:setEmissionRate(117.1978302002)
+    ps:setEmitterLifetime(0.67967891693115)
+    ps:setInsertMode("top")
+    ps:setLinearAcceleration(-0.97704303264618, 1107.4239501953, -0.97704303264618, 1151.7165527344)
+    ps:setLinearDamping(0.60292220115662, 0.55052006244659)
+    ps:setOffset(50, 50)
+    ps:setParticleLifetime(3.0856919288635, 3.160493850708)
+    ps:setRadialAcceleration(-0.21712067723274, 0)
+    ps:setRelativeRotation(true)
+    ps:setRotation(-4.5472402572632, -1.4801363945007)
+    ps:setSizes(0.17049390077591, 1.6384463310242)
+    ps:setSizeVariation(0.76677316427231)
+    ps:setSpeed(715.31878662109, 715.31878662109)
+    ps:setSpin(-0.00074830063385889, 0.00074830063385889)
+    ps:setSpinVariation(0.65814697742462)
+    ps:setSpread(0.53855872154236)
+    ps:setTangentialAcceleration(0, 0)
+
+    return ps
+end
+
+
+function mania:setupRightConfetti()
+    local image1 = love.graphics.newImage("images/particles/star.png")
+    image1:setFilter("linear", "linear")
+
+    local ps = love.graphics.newParticleSystem(image1, 349)
+    ps:setColors(1, 0.890625, 0, 0, 0, 1, 0.859375, 1, 0.5234375, 0, 1, 1, 1, 0, 0.984375, 1)
+    ps:setDirection(-2.1815223693848)
+    ps:setEmissionArea("uniform", 0, 1000, 0, false)
+    ps:setEmissionRate(117.1978302002)
+    ps:setEmitterLifetime(0.67967891693115)
+    ps:setInsertMode("top")
+    ps:setLinearAcceleration(-0.97704303264618, 1107.4239501953, -0.97704303264618, 1151.7165527344)
+    ps:setLinearDamping(0.60292220115662, 0.55052006244659)
+    ps:setOffset(50, 50)
+    ps:setParticleLifetime(3.0856919288635, 3.160493850708)
+    ps:setRadialAcceleration(-0.21712067723274, 0)
+    ps:setRelativeRotation(true)
+    ps:setRotation(-4.5472402572632, -1.4801363945007)
+    ps:setSizes(0.17049390077591, 1.6384463310242)
+    ps:setSizeVariation(0.76677316427231)
+    ps:setSpeed(715.31878662109, 715.31878662109)
+    ps:setSpin(-0.00074830063385889, 0.00074830063385889)
+    ps:setSpinVariation(0.65814697742462)
+    ps:setSpread(0.53855872154236)
+    ps:setTangentialAcceleration(0, 0)
+
+    return ps
+end
+
+
+
+
 function mania:new(chart, parent, fullChart, mods)
     videoFade = 0
     played = false
@@ -54,6 +116,12 @@ function mania:new(chart, parent, fullChart, mods)
         {text = "Restart", subtext = "Try again?", func = function() self:restart() end, width = self.pauseButtonWidth, height = self.pauseButtonHeight, x = baseScreenRatio.x/2, y = baseScreenRatio.y/2, color = rgb({240,219,91}), liquidAssX = 0, liquidAssY = 0},
         {text = "Quit", subtext = "Giving up?", func = function()  self:endSong() end, width = self.pauseButtonWidth, height = self.pauseButtonHeight, x = baseScreenRatio.x/2,y = baseScreenRatio.y/2+300, color = rgb({237,102,92}), liquidAssX = 0, liquidAssY = 0},
     }
+
+    self.rightConfetti = self:setupRightConfetti()
+    self.leftConfetti = self:setupLeftConfetti()
+
+    self.leftConfetti:stop()
+    self.rightConfetti:stop()
 end
 
 
@@ -336,6 +404,17 @@ function mania:update(dt)
 
     --local avg, last = Profiler:getAverage("GAMEMODE:UPDATE"), Profiler:getLastTime("GAMEMODE:UPDATE")
     --print("Time to update MANIA GAMEMODE: ", last, "\nAverage: ", avg)
+
+
+    self.rightConfetti:update(dt)
+    self.leftConfetti:update(dt)
+
+
+    if self.chart and MusicTime >= tonumber(self.chart.meta.songPreviewTime) and not self.doneConfetti then
+        self.doneConfetti = true
+        self.leftConfetti:start()
+        self.rightConfetti:start()
+    end
 end
 
 function mania:endSong()
@@ -403,6 +482,7 @@ end
 function mania:gameOver()
     self:endSong()  -- remove this to see the gameover, but youll be softlocked
 
+    
     if self.parent.gameOver then return end
     self.parent.gameOver = true
     for _, playField in ipairs(self.playField) do
@@ -442,7 +522,6 @@ function mania:draw()
 
     if arrowBatch then love.graphics.draw(arrowBatch) end
     if receptorBatch then love.graphics.draw(receptorBatch) end
-    if noteBatch then love.graphics.draw(noteBatch) end
 
     self.judgementObject:draw()
     if judgementBatch then love.graphics.draw(judgementBatch) end
@@ -464,6 +543,13 @@ function mania:draw()
 
 
     self.judgementCount:draw()
+
+    love.graphics.setBlendMode("add")
+    love.graphics.draw(self.rightConfetti, baseScreenRatio.x,baseScreenRatio.y/2)
+    love.graphics.draw(self.leftConfetti, 0, baseScreenRatio.y/2)
+    love.graphics.setBlendMode("alpha")
+
+    if noteBatch then love.graphics.draw(noteBatch) end
 
     if self.lyricsRenderer then
         self.lyricsRenderer:draw(self.song:tell())

@@ -17,7 +17,7 @@ maniaGrades.getGrades_PLURAL_that_is_grades_WITH_AN_S__this_function_gives_you_t
         {grade = "A", accuracy = 90, color = rgb({127, 255, 152})},
         {grade = "B", accuracy = 80, color = rgb({0, 202, 59})},
         {grade = "C", accuracy = 70, color = rgb({239, 255, 70})},
-        {grade = "D", accuracy = 0, color = rgb({237, 98, 0})},
+        {grade = "D", accuracy = 60, color = rgb({237, 98, 0})},
         {grade = "F", accuracy = 0, color = rgb({95, 0, 0})},
 
     }

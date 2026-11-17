@@ -173,7 +173,7 @@ function love.keypressed(key, scancode, isrepeat)
         State.switch(States.game.resultsState, {
             scoreHandler = { Scores = {
                 trueAccuracy =  100,
-                trueScore = 500000,
+                trueScore = 1000000,
                 truePerformanceRating = 10
             }},
             hits = {10, 20, 30, 40, 30, 20, 10, 0, -10, -20, -30},

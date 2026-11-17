@@ -125,6 +125,7 @@ Language = {
         ["Warning language"] = "Strong Language",
         ["Warning suicide"] = "References to Suicide or Self Harm",
         ["Warning sexual"] = "Sexually Explicit Language or Images",              -- i HIGHLY doubt we will need these but im just adding all the major ones i can think of
+        ["Warning suggestive"] = "Suggestive Themes or Language",
         ["Warning gore"] = "References or Depictions of Blood or Gore",            -- the game would be crazy if we ended up using these all tho lmfao 
         ["Warning mildgore"] = "Mild References or Depictions of Blood",      
         ["Warning violent"] = "References of Violence",

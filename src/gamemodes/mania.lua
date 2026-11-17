@@ -331,11 +331,11 @@ function mania:update(dt)
 
     if self.song and self.playField[1].finished then
         print("SONG END 1")
-        if not self.song:isPlaying() then
+       -- if not self.song:isPlaying() then
             print("SONG END 2")
             if AchievementHandler then AchievementHandler:unlock("finished song") end
             self:endSong()
-        end
+      --  end
     end
 
     if self.song and MusicTime >= 0 and not self.song:isPlaying() and not played and not self.paused then
@@ -390,7 +390,7 @@ function mania:update(dt)
         ::continue::
     end
 
-
+     
     -- counts the current beat based off of music time and bpm changes
     if self.chart and self.chart.bpm then
         for i, BpmChange in ipairs(self.chart.bpm) do
@@ -419,9 +419,9 @@ end
 
 function mania:endSong()
     print("mania:endSong()")
-    if self.song then self.song:stop();print("SONG END 3") end
+  --  if self.song then self.song:stop();print("SONG END 3") end
   --  love.audio.stop()
-    self.song = nil
+   -- self.song = nil
     self.chart = nil
     self.playField = {}
     State.switch(States.game.resultsState, self)

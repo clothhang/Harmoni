@@ -144,14 +144,17 @@ function maniaPlayField:update(dt)
     self.currentTime = self:getPositionFromTime(MusicTime, self.svIndex)
 
     self.totalNotes = 0
+    self.finished = true
     for _, lane in ipairs(self.lanes) do
         lane:update(dt, self.currentTime)
+        if not lane.empty then self.finished = false end
         self.totalNotes = self.totalNotes + #lane.notes
+        if not lane.empty then self.finished = false end
     end
 
-    if MusicTime > self.endNoteTime then
-        self.finished = true
-    end
+  --  if MusicTime > self.endNoteTime then
+   --     self.finished = true
+   -- end
 end
 
 function maniaPlayField:draw()

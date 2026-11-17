@@ -81,10 +81,10 @@ vec3 renderMetaBall(vec2 uv) {
         number radius = mix(0.35, 0.70, random_number(seed)) * SIZE_MULTIPLIER;
         vec3 ballCol = colors[random_range(seed + 12345, 0, REPLACE_ME_NEG1)];
         number dist = max(length(uv - pos), 0.0001);
-        number field = radius / dist;
+        number field = radius / di
 
-        totalAlpha += field;
-        rgbTotal += ballCol * field;
+        totalAlpha += feld;
+        rgbTotal += ball
 
         if (field > strongestField) {
             strongestField = field;

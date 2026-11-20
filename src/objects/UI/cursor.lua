@@ -294,6 +294,7 @@ function cursor:draw()
     for i = 1,#self.particlesTable do
         local system = self.particlesTable[i]
         love.graphics.draw(system.ps, system.x, system.y)
+        print(system.ps:isActive())
     end
     love.graphics.setColor(lastColor)
 end
@@ -323,6 +324,7 @@ end
 
 function cursor:cloneParticleSystem()
     local clone = self.clickParticle:clone()
+    clone:start()
     print(clone, self.x, self.y)
     table.insert(self.particlesTable, {ps = clone, x = self.x, y = self.y})
 

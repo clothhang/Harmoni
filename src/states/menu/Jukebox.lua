@@ -12,7 +12,7 @@ function jukebox:enter(parent)
 
     self.songButtonX = 10
     self.songButtonWidth = 475
-    self.songButtonHeight = 75
+    self.songButtonHeight = 40
     self.songButtonSpacing = 10
     self.songButtons = {}
     self.scrubber = nil

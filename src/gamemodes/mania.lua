@@ -3,7 +3,7 @@ local videoFade = 0
 local played = false
 
 function mania:setupLeftConfetti()
-    local image1 = love.graphics.newImage("images/particles/star.png")
+    local image1 = love.graphics.newImage("images/particles/5 point star.png")
     image1:setFilter("linear", "linear")
 
     local ps = love.graphics.newParticleSystem(image1, 389)
@@ -33,7 +33,7 @@ end
 
 
 function mania:setupRightConfetti()
-    local image1 = love.graphics.newImage("images/particles/star.png")
+    local image1 = love.graphics.newImage("images/particles/5 point star.png")
     image1:setFilter("linear", "linear")
 
     local ps = love.graphics.newParticleSystem(image1, 349)
@@ -200,8 +200,9 @@ function mania:setUpObjects()
     self.countdownBar = countdownBar(baseScreenRatio.x/2, baseScreenRatio.y/2-50, 500, 20, 1.5)
 
     local songLength = self.song and self.song:getDuration("seconds") or 0
+    print(type(self.playField[1].endNoteTime))
     self.timeRemaingBar = UITimeRemaing(
-        0, songLength,
+        0, self.playField[1].endNoteTime,
         0, baseScreenRatio.y - 50,
         baseScreenRatio.x,
         self,
@@ -329,7 +330,7 @@ function mania:update(dt)
     -- should only ever update the FIRST playfield
     --[[ self.playField[1]:update(dt) ]]
 
-    if self.song and self.playField[1].finished then
+    if self.song and self.playField and self.playField[1] and self.playField[1].finished then
         print("SONG END 1")
        -- if not self.song:isPlaying() then
             print("SONG END 2")
@@ -500,8 +501,8 @@ function mania:draw()
         self.videoBackground:draw()
     end
 
-    local coverAlpha = 1 - (Settings:getValue("Gameplay", "Mania", "Background Brightness") / 100)
-    love.graphics.setColor(0, 0, 0, coverAlpha)
+   -- local coverAlpha = 1 - (gameplayBackgroundDim)
+    love.graphics.setColor(0, 0, 0, 0)
     love.graphics.rectangle("fill", 0, 0, baseScreenRatio.x, baseScreenRatio.y)
     love.graphics.setColor(1,1,1)
 

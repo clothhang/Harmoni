@@ -57,6 +57,7 @@ function maniaPlayField:new(chart, parent)
                 if noteEndTime > self.endNoteTime then
                     self.endNoteTime = noteEndTime
                 end
+                print(noteEndTime)
             end
         end
 

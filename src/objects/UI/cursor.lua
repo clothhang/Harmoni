@@ -29,11 +29,43 @@ local function aproxAtan2Deg(y, x)
     return angle
 end
 
+function cursor:setupClickParticles()
+    local image1 = love.graphics.newImage("images/particles/ring.png")
+    image1:setFilter("linear", "linear")
+
+    local ps = love.graphics.newParticleSystem(image1, 4)
+    ps:setColors(0.0078125, 0, 1, 0, 0, 0.25, 1, 1, 0, 0.765625, 1, 1, 0.21875, 0, 1, 0)
+    ps:setDirection(-1.5657712221146)
+    ps:setEmissionArea("none", 0, 0, 0, false)
+    ps:setEmissionRate(3.266339302063)
+    ps:setEmitterLifetime(0)
+    ps:setInsertMode("top")
+    ps:setLinearAcceleration(0, 0, 0, 0)
+    ps:setLinearDamping(1.3394032716751, 1.4063632488251)
+    ps:setOffset(50, 50)
+    ps:setParticleLifetime(1.7999999523163, 2.2000000476837)
+    ps:setRadialAcceleration(0, 0)
+    ps:setRelativeRotation(false)
+    ps:setRotation(0, 0)
+    ps:setSizes(0.32010126113892)
+    ps:setSizeVariation(0)
+    ps:setSpeed(161.70420837402, 161.70420837402)
+    ps:setSpin(0, 0)
+    ps:setSpinVariation(0)
+    ps:setSpread(6.2831854820251)
+    ps:setTangentialAcceleration(0, 0)
+
+    return ps
+end
+
 function cursor:new()
     self.x, self.y = getMousePos()
     self.prevX, self.prevY = self.x, self.y
     self.mouseDownX, self.mouseDownY = nil, nil
     self.rotating = false
+
+    self.clickParticle = self:setupClickParticles()
+    self.particlesTable = {} -- i am so fucking sorry 
 
     self.angle = 0-- 99999999999999999999999999999999999999991
     self.targetAngle = 0
@@ -70,6 +102,14 @@ function cursor:update(dt)
     -- fix for cursor breaking if its wound up for 45.6 sextillion times longer than the age of the universe (634.7 nonillion years)
     --  (assuming its wound continuously at 5 rotations per second)
 
+    self.clickParticle:update(dt)
+    for i = 1,#self.particlesTable do
+        local system = self.particlesTable[i]
+        system.ps:update(dt)
+
+        -- this is commented out for now until i get the particles to even fucking show up (i never tested with this line uncommented so idk if its even right)
+        --if system:count() == 0 then table.remove(self.particlesTable[i]); break end
+    end
 
     self.x, self.y = getMousePos()
     if self.x ~= self.prevX or self.y ~= self.prevY then
@@ -184,6 +224,8 @@ function cursor:update(dt)
             self.weightAngle = self.weightAngle + 360
         end
     end
+
+
 end
 
 function cursor:getX()
@@ -249,11 +291,18 @@ function cursor:draw()
         end
     end
 
+    for i = 1,#self.particlesTable do
+        local system = self.particlesTable[i]
+        love.graphics.draw(system.ps, system.x, system.y)
+    end
     love.graphics.setColor(lastColor)
 end
 
 function cursor:mousepressed(x, y, button)
     if button == 1 then
+        self:cloneParticleSystem() -- do the thingy
+        self.particlesTable[#self.particlesTable].ps:emit(4) -- make the last created system emit
+
         if AchievementHandler then AchievementHandler:unlock("left click") end
         self.mouseDownX, self.mouseDownY = x, y
 
@@ -270,6 +319,13 @@ function cursor:mousereleased(x, y, button)
 
         self:scaleUp()
     end
+end
+
+function cursor:cloneParticleSystem()
+    local clone = self.clickParticle:clone()
+    print(clone, self.x, self.y)
+    table.insert(self.particlesTable, {ps = clone, x = self.x, y = self.y})
+
 end
 
 function cursor:scaleDown()

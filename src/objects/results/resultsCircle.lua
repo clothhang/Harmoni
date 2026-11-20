@@ -34,6 +34,35 @@ function resultsCircle:setupSparkles()    -- thank you hot particles ur the goat
     return ps
 end
 
+function resultsCircle:setupGoldShit()   -- no way gold shit like from umamausemsama or whatevr its called 
+    local image1 = love.graphics.newImage("images/particles/lightDot.png")
+    image1:setFilter("linear", "linear")
+
+    local ps = love.graphics.newParticleSystem(image1, 47)
+    ps:setColors(1, 0, 0, 0, 1, 0.5859375, 0, 0.66015625, 1, 1, 1, 0.50390625, 1, 0.8203125, 0, 1, 0.875, 1, 0, 1, 0.875, 1, 0, 0)
+    ps:setDirection(-1.5707963705063)
+    ps:setEmissionArea("ellipse", 400, 400, 0, false)
+    ps:setEmissionRate(80)
+    ps:setEmitterLifetime(-1)
+    ps:setInsertMode("top")
+    ps:setLinearAcceleration(-99.439125061035, -99.439125061035, 99.439125061035, 99.439125061035)
+    ps:setLinearDamping(1.9606201648712, -0.51036554574966)
+    ps:setOffset(90, 90)
+    ps:setParticleLifetime(0.44999998807907, 0.55000001192093)
+    ps:setRadialAcceleration(133.1333770752, -133.1333770752)
+    ps:setRelativeRotation(false)
+    ps:setRotation(5.7395401000977, 0)
+    ps:setSizes(0.26076717078686)
+    ps:setSizeVariation(0)
+    ps:setSpeed(0.082181096076965, -2.0545275211334)
+    ps:setSpin(0, 0)
+    ps:setSpinVariation(0)
+    ps:setSpread(0)
+    ps:setTangentialAcceleration(80.537475585938, -80.537475585938)
+
+    return ps
+end
+
 function resultsCircle:setupLeftConfetti()
     local image1 = love.graphics.newImage("images/particles/light.png")
     image1:setFilter("linear", "linear")
@@ -75,7 +104,7 @@ function resultsCircle:setupRightConfetti()
     ps:setEmissionRate(200.357177734375)
     ps:setEmitterLifetime(0.56413877010345)
     ps:setInsertMode("top")
-ps:setLinearAcceleration(0.45932897925377, 520.62384033203, 0.051036551594734, 541.44677734375)
+    ps:setLinearAcceleration(0.45932897925377, 520.62384033203, 0.051036551594734, 541.44677734375)
     ps:setLinearDamping(0.31050637364388, 0.31050637364388)
     ps:setOffset(75, 75)
     ps:setParticleLifetime(4.0770449638367, 4.1288161277771)
@@ -100,6 +129,7 @@ end
 
 function resultsCircle:new(x,y,percent,callback,delay)
     self.sparkles = self:setupSparkles()
+    self.goldShit = self:setupGoldShit()
     self.leftConfetti = self:setupLeftConfetti()
     self.rightConfetti = self:setupRightConfetti()
     self.emptyImage = SkinHandler:getImage("Results", "Circle Empty")
@@ -198,6 +228,9 @@ function resultsCircle:update(dt)
 
     if self.gradePresented then
         if self.sparkle then self.sparkles:update(dt) end
+        if self.sparkle and self.goldFadeStarted then
+            self.goldShit:update(dt)
+        end
 
         if self.confetti then
             self.leftConfetti:update(dt)
@@ -254,6 +287,7 @@ function resultsCircle:draw()
         love.graphics.setColor(self.fillColor)
     end
 
+
     love.graphics.draw(self.fillImage, self.x, self.y, nil, 1, 1, self.emptyImage:getWidth()/2, self.emptyImage:getHeight()/2)
 
     love.graphics.setShader()
@@ -263,7 +297,11 @@ function resultsCircle:draw()
     love.graphics.draw(self.emptyImage, self.x, self.y, nil, 1, 1, self.emptyImage:getWidth()/2, self.emptyImage:getHeight()/2)
 
     love.graphics.setBlendMode("add")
-    love.graphics.draw(self.sparkles, self.x, self.y-100)
+    if isGoldRank then
+        love.graphics.draw(self.goldShit,self.x, self.y-100)
+    else
+        love.graphics.draw(self.sparkles, self.x, self.y-100)
+    end
     love.graphics.draw(self.leftConfetti, 0, baseScreenRatio.y)
     love.graphics.draw(self.rightConfetti, baseScreenRatio.x, baseScreenRatio.y)
 

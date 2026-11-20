@@ -35,6 +35,8 @@ end
 
 function resultsState:enter(s, parent)
 
+    --State.switch(States.extra.markus)
+    --love.audio.stop()
 
     self.parent = parent
     self.background = parent.background or sharedBackground("Images/burgerr.jpg", 0.5, 1)

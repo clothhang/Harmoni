@@ -41,15 +41,15 @@ function cursor:setupClickParticles()
     ps:setEmitterLifetime(0)
     ps:setInsertMode("top")
     ps:setLinearAcceleration(0, 0, 0, 0)
-    ps:setLinearDamping(1.3394032716751, 1.4063632488251)
+    ps:setLinearDamping(4.1745858192444, 4.4113955497742)
     ps:setOffset(50, 50)
-    ps:setParticleLifetime(1.7999999523163, 2.2000000476837)
+    ps:setParticleLifetime(0.56850636005402, 0.66894632577896)
     ps:setRadialAcceleration(0, 0)
     ps:setRelativeRotation(false)
     ps:setRotation(0, 0)
     ps:setSizes(0.32010126113892)
     ps:setSizeVariation(0)
-    ps:setSpeed(161.70420837402, 161.70420837402)
+    ps:setSpeed(477.88586425781, 477.88586425781)
     ps:setSpin(0, 0)
     ps:setSpinVariation(0)
     ps:setSpread(6.2831854820251)
@@ -57,6 +57,9 @@ function cursor:setupClickParticles()
 
     return ps
 end
+
+
+
 
 function cursor:new()
     self.x, self.y = getMousePos()
@@ -106,10 +109,10 @@ function cursor:update(dt)
     for i = 1,#self.particlesTable do
         local system = self.particlesTable[i]
         system.ps:update(dt)
-
-        -- this is commented out for now until i get the particles to even fucking show up (i never tested with this line uncommented so idk if its even right)
-        --if system:count() == 0 then table.remove(self.particlesTable[i]); break end
+        if system.ps:getCount() == 0 then table.remove(self.particlesTable, i); break end
     end
+
+
 
     self.x, self.y = getMousePos()
     if self.x ~= self.prevX or self.y ~= self.prevY then
@@ -294,8 +297,8 @@ function cursor:draw()
     for i = 1,#self.particlesTable do
         local system = self.particlesTable[i]
         love.graphics.draw(system.ps, system.x, system.y)
-        print(system.ps:isActive())
     end
+  love.graphics.draw(self.clickParticle)
     love.graphics.setColor(lastColor)
 end
 
@@ -303,6 +306,10 @@ function cursor:mousepressed(x, y, button)
     if button == 1 then
         self:cloneParticleSystem() -- do the thingy
         self.particlesTable[#self.particlesTable].ps:emit(4) -- make the last created system emit
+   --   self.clickParticle:moveTo(self.x,self.y) 
+    --  self.clickParticle:start()
+     -- self.clickParticle:emit(4)
+     -- self.clickParticle:stop()
 
         if AchievementHandler then AchievementHandler:unlock("left click") end
         self.mouseDownX, self.mouseDownY = x, y

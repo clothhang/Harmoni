@@ -10,7 +10,7 @@ function resultsCircle:setupSparkles()    -- thank you hot particles ur the goat
     image1:setFilter("linear", "linear")
 
     local ps = love.graphics.newParticleSystem(image1, 15)
-    ps:setColors(1, 0.890625, 0, 0, 0, 1, 0.859375, 1, 0.5234375, 0, 1, 1, 1, 0, 0.984375, 1)
+    ps:setColors(1, 0.890625, 0, 0, 0, 1, 0.859375, 1, 0.5234375, 0, 1, 1, 1, 0, 0.984375, 0)
     ps:setDirection(-1.5707963705063)
     ps:setEmissionArea("ellipse", 400, 400, 0, false)
     ps:setEmissionRate(18.494899749756)

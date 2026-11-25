@@ -30,6 +30,11 @@ function preloadState:enter()
     self.throbbert = throbbert({{1,1,1,1}, {1,1,1,1}, {1,1,1,1}})
     if not self.debug then  end
     love.timer.sleep(0.5)
+
+    GlobalNotificationsHandler:addNotification("TEST", "error")
+    GlobalNotificationsHandler:addNotification("TEST", "warning")
+    GlobalNotificationsHandler:addNotification("TEST", "info")
+
 end
 
 function preloadState:update(dt)

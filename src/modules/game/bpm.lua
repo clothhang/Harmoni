@@ -38,6 +38,7 @@ function bpmHandler:update(dt)
 
     if self.currentMusicTime >= self.nextBeatTime then
         self.beatHitOnFrame = true
+        --print("beat handler beat hit")
         self.currentBeat = self.currentBeat + 1
         self.nextBeatTime = self.currentBeat * self.beatInterval
     end

@@ -8,6 +8,8 @@ function titleScreen:enter(from, resetItems, fadeIn)
 
     local validSongs = {}
     local songsWithAudio = {}
+        self.bpmHandler = require("modules.game.bpm")
+
 
     for _, song in ipairs(self.songList) do
         local diffList = SongListManager.getDifficultyList(musicPath .. song)
@@ -29,15 +31,23 @@ function titleScreen:enter(from, resetItems, fadeIn)
         end
     end
 
+
+
     self.songList = validSongs
     self.selectedSong = 1
     self.currentSongInfo = {}
+
+    GlobalNotificationsHandler:addNotification("Test error", "error")
+    GlobalNotificationsHandler:addNotification("Test warning", "warning")
+    GlobalNotificationsHandler:addNotification("Test info", "info")
 
     local songSelect = States.menu.songSelect
 
     if songSelect.currentPlayingSong then
         self.selectedSong = songSelect.currentPlayingSong
         self.currentSongInfo = songSelect.currentSongInfo or {}
+        self:resetBpmShit(self.currentSongInfo.bpm or 100)
+
     elseif #songsWithAudio > 0 then
         local selected = songsWithAudio[love.math.random(1, #songsWithAudio)]
 
@@ -53,10 +63,14 @@ function titleScreen:enter(from, resetItems, fadeIn)
         songSelect.currentPlayingSong = selected.index
         songSelect.currentSongInfo = selected.info
         songSelect.currentAudio:play()
+        self:resetBpmShit(self.currentSongInfo.bpm or 100)
+
     end
 
     if songSelect.currentAudio and not songSelect.currentAudio:isPlaying() then
         songSelect.currentAudio:play()
+                self:resetBpmShit(self.currentSongInfo.bpm or 100)
+
     end
 
     fade = 0
@@ -268,7 +282,8 @@ function titleScreen:enter(from, resetItems, fadeIn)
             self:setUpThoseSqauresThatIHate()
 
     self.thoseWeirdGrowingCirclesThatIHate = growingCircleObjectThingyIdfk()
-    self.UItrail = UItrail({{x = 0, y = 836}, {x = 582, y = 326}, {x = 297, y = 0}, {x = 297, y = -100}, {x = 1893, y = -100}, {x = 1893, y = 0}, {x = 1749, y = 413}, {x = 2559, y = 696}, {x = 2659, y = 696}, {x = 2659, y = 1101}, {x = 2559, y =1101}, {x = 2273,  y = 813}, {x = 1643, y = 1439}, {x = 1643, y = 1539}, {x = -100, y = 1540}, {x = -100, y = 836}}, 1000, 2, function() end, false, 5)
+    self.UItrail = UItrail({{x = 0, y = 836}, {x = 582, y = 326}, {x = 297, y = 0}, {x = 297, y = -100}, {x = 1893, y = -100}, {x = 1893, y = 0}, {x = 1749, y = 413}, {x = 2559, y = 696}, {x = 2659, y = 696}, {x = 2659, y = 1101}, {x = 2559, y =1101}, {x = 2273,  y = 813}, {x = 1643, y = 1439}, {x = 1643, y = 1539}, {x = -100, y = 1540}, {x = -100, y = 836}}, 
+    500, 2, function() end, false, 5)
 
 
     if self.coverAlpha > 0 then
@@ -278,6 +293,12 @@ function titleScreen:enter(from, resetItems, fadeIn)
     end
 
     self.metaballs = Metaballs()
+end
+
+function titleScreen:resetBpmShit(newBpm)
+    self.bpmHandler:init()
+    self.bpmHandler:setBpm(newBpm or 100)
+    print("titlescreen bpm handler:", newBpm)
 end
 
 function titleScreen:setupSocialButtons()
@@ -425,7 +446,21 @@ function titleScreen:update(dt)
     self.metaballs:update(dt)
     self.UItrail:update(dt)
     fade = math.min(fade + dt*5, 1)
+    self.bpmHandler:update(dt)
 
+
+
+    --[[
+    if Input:pressed("lane14K") then       -- not removing this cuz its actually useful for testing smth
+       for i = 1,1000 do
+           State.transition("waveDissolve", States.menu.songSelect, nil, self.selectedSong)
+            State.transition("waveDissolve", States.menu.titleScreen, function()
+            self:clearBanners()
+            end)
+        end
+    end
+
+--]]
     for i, Button in ipairs(self.buttons) do
         Button:update(dt)
     end
@@ -451,9 +486,32 @@ function titleScreen:update(dt)
 
 
     if States.menu.songSelect.currentAudio then
-        MusicTime = States.menu.songSelect.currentAudio:tell()
+        MusicTime = States.menu.songSelect.currentAudio:tell()*1000   -- i have no fucking clue why you need to make it seconds for it to work here but NOT in song select 
     end
     States.menu.songSelect:checkForSongLoop()
+
+    if self.bpmHandler:wasBeatHit() then self:onBeatHit() end
+   -- print(self.bpmHandler:wasBeatHit())
+
+end
+
+function titleScreen:onBeatHit()
+    -- logo shit
+    self.logoBeatSizeIncrease = 0.005
+    if self.logoBeatSizeIncrease then Timer.cancel(self.logoBeatSizeIncrease) end
+    self.logoBeatTimer = Timer.tween(0.15, self, {logoBeatSizeIncrease = 0}, "out-quad")
+
+
+    -- ui trail shit
+    self.UItrail.pixelsPerSecond = 1000
+    if self.uiTrailTimer then Timer.cancel(self.uiTrailTimer) end
+   -- print("uitrail", self.UItrail.pixelsPerSecond)
+    self.uiTrailTimer = Timer.tween(0.5, self.UItrail, {pixelsPerSecond = 50}, "out-quad")
+
+
+    -- layer wave shit 
+    if self.layerWavesBeatTimer then Timer.cancel(self.layerWavesBeatTimer) end
+    self.layerWavesBeatTimer = Timer.tween(1, self.layerWaves, {thatOneValue = self.layerWaves.thatOneValue + 1}, "out-quad")
 end
 
 function titleScreen:updateBubbles(dt)
@@ -582,7 +640,8 @@ end
 function titleScreen:drawLogo()
     -- logo variables 
     local fullLogo = self.images["logo"].image
-    local fullLogoSizeX, fullLogoSizeY, fullLogoX, fullLogoY = 0.3,0.3, baseScreenRatio.x/2, baseScreenRatio.y/2
+
+    local fullLogoSizeX, fullLogoSizeY, fullLogoX, fullLogoY = 0.3 + (self.logoBeatSizeIncrease or 0),0.3 + (self.logoBeatSizeIncrease or 0), baseScreenRatio.x/2, baseScreenRatio.y/2
     ---@diagnostic disable-next-line: need-check-nil
     local fullLogoCenterX, fullLogoCenterY = fullLogo:getWidth()/2, fullLogo:getHeight()/2
 

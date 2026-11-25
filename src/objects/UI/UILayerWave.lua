@@ -8,7 +8,10 @@ function UILayerWave:new(x,y,width,height,layerCount,segments,amplitude,layerSpa
     self.layers = {}
     segments = segments or 20
     amplitude = amplitude or 20
+    self.thatOneValue = 0
     layerSpacing = layerSpacing or 0
+
+    self.amplitude = amplitude
 
     for i = 1, layerCount do
         self:createLayer(
@@ -61,9 +64,11 @@ function UILayerWave:createLayer(x, y, width, height, segments, amplitude, index
 end
 
 function UILayerWave:update(dt)
-    local time = love.timer.getTime()
+
+    self.time = love.timer.getTime()+self.thatOneValue
 
     for _, layer in ipairs(self.layers) do
+        layer.amplitude = self.amplitude
         local pts = layer.points
         local x = layer.x
         local y = layer.y
@@ -72,7 +77,7 @@ function UILayerWave:update(dt)
         local amp = layer.amplitude
         local seg = layer.segments
         local spacing = layer.spacing
-        local basePhase = layer.phaseOffset + time * layer.speed
+        local basePhase = layer.phaseOffset + self.time * layer.speed
 
         local p = 1
 
